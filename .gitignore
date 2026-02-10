@@ -1,0 +1,40 @@
+# ./project_data.db
+
+# ./frontend/node_modules
+# ./frontend/package-lock.json
+
+# ./backend/__pycache__
+# ./backend/myenv
+# ./backend/.env
+
+
+# Database
+*.db
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+myenv/
+
+# Environment variables
+.env
+*.env
+
+# Node
+node_modules/
+
+# Build folders
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

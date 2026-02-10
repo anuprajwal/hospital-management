@@ -1,0 +1,1 @@
+ACCEPTABLE_ROLES = ['Super_Admin', 'Receptionist', 'Lab_Incharge']
