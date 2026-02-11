@@ -27,16 +27,12 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import TopHeader from "@/components/Top-Header"
-// import Sidebar from "@/components/Navbar"
+import FieldConfigPopup from "./AddFieldPopup";
 
 
 const schemaFields = [
     { name: "id", type: "UUID", required: true, default: "auto-generated", locked: true, typeColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border-indigo-200" },
     { name: "created_at", type: "DateTime", required: true, default: "CURRENT_TIMESTAMP", locked: true, typeColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200" },
-    { name: "patient_name", type: "String", required: true, default: "null", locked: false },
-    { name: "age", type: "Integer", required: false, default: "0", locked: false },
-    { name: "primary_doctor", type: "Relation", required: true, default: "null", locked: false, typeColor: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200" },
-    { name: "appointment_type", type: "Enum", required: true, default: "'REGULAR'", locked: false },
 ];
 
 const infoCards = [
@@ -60,33 +56,28 @@ const infoCards = [
 const ConfigHeader = () => {
     return (
         <div className="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen">
-            <TopHeader/>
+            <TopHeader />
             <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-right">
                     {/* Action Buttons Section */}
                     <div className="flex items-center space-x-3">
-                        {/* Add Field - Outline style with primary tint */}
-                        <Button
-                            variant="outline"
-                            className="border-primary/30 text-primary hover:bg-primary/5 hover:text-primary font-semibold"
-                        >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Field
-                        </Button>
-
+                        <FieldConfigPopup
+                            triggerElement={
+                                <Button
+                                    variant="outline"
+                                    className="border-primary/30 text-primary hover:bg-primary/5 hover:text-primary font-semibold"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Field
+                                </Button>
+                            }
+                        />
                         {/* Save Schema - Secondary/Ghostly style */}
                         <Button
                             variant="secondary"
                             className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
                         >
                             Save Schema
-                        </Button>
-
-                        {/* Publish - High emphasis primary */}
-                        <Button
-                            className="px-6 bg-primary hover:bg-primary/90 text-white font-semibold shadow-md shadow-primary/20"
-                        >
-                            Publish
                         </Button>
                     </div>
                 </div>

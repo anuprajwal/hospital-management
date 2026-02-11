@@ -1,1 +1,1 @@
-ACCEPTABLE_ROLES = ['Super_Admin', 'Receptionist', 'Lab_Incharge']
+ACCEPTABLE_ROLES = ['Super_Admin', 'Receptionist', 'Lab_Incharge', 'Admin']

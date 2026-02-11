@@ -43,23 +43,6 @@ const Sidebar = () => {
           ))}
         </nav>
       </ScrollArea>
-
-      {/* Storage Card Section */}
-      <div className="p-4 mt-auto">
-        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-            Storage
-          </p>
-          
-          <Progress value={45} className="h-1.5" />
-          
-          <div className="flex justify-between items-center mt-3">
-            <p className="text-xs text-slate-500">
-              <span className="font-medium text-slate-900 dark:text-slate-300">4.2 GB</span> of 10 GB
-            </p>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };

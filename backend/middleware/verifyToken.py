@@ -12,6 +12,9 @@ def token_required(f):
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
 
+        if request.method == "OPTIONS":
+            return '', 200
+
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
             current_user_id = data['user_id']

@@ -10,12 +10,13 @@ from werkzeug.security import generate_password_hash
 def createAdminAccount():
     data = request.json
     conn = get_db_connection()
+    print(data['role'])
     try:
-        conn.execute('INSERT INTO users (user_name, password, role) VALUES (?, ?, ?)',
-                     (data['name'], generate_password_hash(data['password']), data['role']))
+        conn.execute('INSERT INTO users (user_name, password, status, role) VALUES (?, ?, ?, ?)',
+                     (data['name'], generate_password_hash(data['password']), 'Approve', data['role']))
         conn.commit()
         return jsonify({"message": "Success"}), 201
-    except sqlite3.IntegrityError:
-        return jsonify({"error": "Check constraint failed"}), 400
+    except sqlite3.IntegrityError as e:
+        return jsonify({"error": f"Check constraint failed, {e}"}), 400
     finally:
         conn.close()

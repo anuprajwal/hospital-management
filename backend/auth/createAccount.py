@@ -21,8 +21,8 @@ def createAccount(current_user_id, current_user_name, current_role):
 
     conn = get_db_connection()
     try:
-        conn.execute('INSERT INTO users (user_name, password, role) VALUES (?, ?, ?)',
-                     (data['name'], generate_password_hash(data['password']), data['role']))
+        conn.execute('INSERT INTO users (user_name, password, status, role) VALUES (?, ?, ?, ?)',
+                     (data['name'], generate_password_hash(data['password']), data['status'], data['role']))
         conn.commit()
         return jsonify({"message": "Success"}), 201
     except sqlite3.IntegrityError:

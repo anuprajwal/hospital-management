@@ -18,7 +18,30 @@ def initialize_database():
             user_name TEXT NOT NULL,
             password TEXT NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('Super_Admin', 'Receptionist', 'Lab_Incharge')),
+            status TEXT NOT NULL CHECK(status IN ('Approve', 'Frozen')),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS forms (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            form_name TEXT NOT NULL,
+            form_fields TEXT NOT NULL,
+            is_allowed INTEGER DEFAULT 1 CHECK(is_allowed IN (0, 1)),
+            created_on DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS data (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL, -- Reference to users table ID
+            form_id INTEGER NOT NULL, -- Foreign Key
+            form_data TEXT NOT NULL,  -- String for JSON
+            created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (form_id) REFERENCES forms (id)
         )
     """)
 

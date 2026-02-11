@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from "./pages/Auth/Login/Login"
-import HospitalModules from "./pages/HospitalAdmin/FormConfig/FormConfigHoms"
-import ConfigHeader from "./pages/HospitalAdmin/FormConfig/EachForm"
+import HospitalModules from "./pages/HospitalAdmin/FormConfig/FormConfigHome"
+import ConfigHeader from "./pages/HospitalAdmin/FormConfig/EachForm.jsx"
 import UserManagement from "./pages/HospitalAdmin/UserManagement/UsersHomePage"
 
 // This is a wrapper to handle the side-by-side layout
@@ -19,7 +19,7 @@ function App() {
         
         {/* You can add your Dashboard route here later */}
         <Route path="/dashboard" element={<HospitalModules />} />
-        <Route path="/each" element={<ConfigHeader />} />
+        <Route path="/form-edit" element={<ConfigHeader />} />
         <Route path="/users" element={<UserManagement />} />
         {/* <Route path="/dashboard" element={<HospitalModules />} />
         <Route path="/dashboard" element={<HospitalModules />} />
