@@ -12,8 +12,8 @@ const TopHeader = () => {
     <header className="h-16 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background px-6 z-20">
       {/* Left Section: Logo */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg text-primary-foreground">
-          <Hospital className="w-5 h-5" />
+        <div className="flex items-center justify-center w-10 h-10 text-primary-foreground">
+          <img src="../../public/Logo.jpeg" className="w-10 h-10" />
         </div>
         <h2 className="text-lg font-bold tracking-tight">HMS</h2>
       </div>

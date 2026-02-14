@@ -4,11 +4,14 @@ import LoginPage from "./pages/Auth/Login/Login"
 import HospitalModules from "./pages/HospitalAdmin/FormConfig/FormConfigHome"
 import ConfigHeader from "./pages/HospitalAdmin/FormConfig/EachForm.jsx"
 import UserManagement from "./pages/HospitalAdmin/UserManagement/UsersHomePage"
+import { Toaster } from "@/components/ui/sonner"
 
 // This is a wrapper to handle the side-by-side layout
 
 function App() {
   return (
+    <>
+    <Toaster position="top-right" richColors />
     <Router>
       <Routes>
         {/* Default route shows the login layout */}
@@ -28,6 +31,7 @@ function App() {
         <Route path="/dashboard" element={<HospitalModules />} /> */}
       </Routes>
     </Router>
+    </>
   );
 }
 

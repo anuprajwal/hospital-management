@@ -1,15 +1,13 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-    Plus, Lock,
+    Plus,
     CheckCircle2,
     XCircle,
-    Edit2,
     Trash2,
     ChevronLeft,
-    ChevronRight, Info, Bolt, Database
+    ChevronRight, Info, Bolt, Database, Loader2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -19,7 +17,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import {
     Card,
     CardContent,
@@ -28,11 +25,14 @@ import {
 } from "@/components/ui/card";
 import TopHeader from "@/components/Top-Header"
 import FieldConfigPopup from "./AddFieldPopup";
+import { toast } from "sonner";
+import { useSearchParams } from 'react-router-dom';
+import { saveFormConfig, fetchAvailableForms } from './apis';
 
 
-const schemaFields = [
-    { name: "id", type: "UUID", required: true, default: "auto-generated", locked: true, typeColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border-indigo-200" },
-    { name: "created_at", type: "DateTime", required: true, default: "CURRENT_TIMESTAMP", locked: true, typeColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200" },
+const SYSTEM_FIELDS = [
+    { name: "id", type: "UUID", required: true, default: "auto-generated", locked: true, typeColor: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+    { name: "created_at", type: "DateTime", required: true, default: "CURRENT_TIMESTAMP", locked: true, typeColor: "bg-blue-100 text-blue-700 border-blue-200" },
 ];
 
 const infoCards = [
@@ -54,6 +54,90 @@ const infoCards = [
 ];
 
 const ConfigHeader = () => {
+    const [searchParams] = useSearchParams();
+
+    const moduleId = searchParams.get('module_id');
+
+    const [userFields, setUserFields] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [isFetching, setIsFetching] = useState(true); // Loading state for initial fetch
+    const [existingForm, setExistingForm] = useState(null); // Stores existing form meta
+
+    useEffect(() => {
+        const saved = localStorage.getItem(`fields_${moduleId}`);
+        if (saved) setUserFields(JSON.parse(saved));
+    }, [moduleId]);
+
+
+    const handleAddField = (newField) => {
+        setUserFields([...userFields, { ...newField, locked: false }]);
+    };
+
+
+    const allFields = [...SYSTEM_FIELDS, ...userFields];
+
+    useEffect(() => {
+        const loadInitialData = async () => {
+            setIsFetching(true);
+            try {
+                const forms = await fetchAvailableForms(moduleId);
+
+                console.log(forms)
+                
+                // Assuming we check for a specific form name or just the first form for this module
+                const currentForm = forms.forms.find(f => f.module_id === moduleId);
+
+                if (currentForm && currentForm.fields) {
+                    setExistingForm(currentForm);
+                    // Filter out system fields so they don't duplicate in userFields state
+                    const customFields = currentForm.fields.filter(
+                        f => !SYSTEM_FIELDS.some(sf => sf.name === f.name)
+                    );
+                    setUserFields(customFields);
+                }
+            } catch (error) {
+                console.error("Failed to load existing schema:", error);
+                // Fallback to localStorage if API fails or is empty
+                const saved = localStorage.getItem(`fields_${moduleId}`);
+                if (saved) setUserFields(JSON.parse(saved));
+            } finally {
+                setIsFetching(false);
+            }
+        };
+
+        if (moduleId) loadInitialData();
+    }, [moduleId]);
+
+    // 2. Optimized Publish Logic
+    const handlePublish = async () => {
+        setIsLoading(true);
+        try {
+            const isUpdate = !!existingForm; // If we found a form earlier, it's a PUT
+            
+            const payload = {
+                form_name: existingForm?.form_name || "New Form", // Use existing name or default
+                module_id: moduleId,
+                fields: [...SYSTEM_FIELDS, ...userFields]
+            };
+
+            await saveFormConfig(payload, isUpdate);
+            
+            toast.success(isUpdate ? "Schema updated!" : "Schema published!");
+            
+            // Refresh local state to confirm update mode
+            if (!isUpdate) {
+                const updatedForms = await fetchAvailableForms(moduleId);
+                setExistingForm(updatedForms.find(f => f.module_id === moduleId));
+            }
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
     return (
         <div className="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen">
             <TopHeader />
@@ -61,29 +145,23 @@ const ConfigHeader = () => {
                 <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-right">
                     {/* Action Buttons Section */}
                     <div className="flex items-center space-x-3">
-                        <FieldConfigPopup
+                        <FieldConfigPopup 
+                            onSave={handleAddField}
                             triggerElement={
-                                <Button
-                                    variant="outline"
-                                    className="border-primary/30 text-primary hover:bg-primary/5 hover:text-primary font-semibold"
-                                >
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Add Field
-                                </Button>
+                                <Button variant="outline"><Plus className="w-4 h-4 mr-2"/> Add Field</Button>
                             }
-                        />
-                        {/* Save Schema - Secondary/Ghostly style */}
-                        <Button
-                            variant="secondary"
-                            className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
+                        />                        <Button 
+                            onClick={handlePublish} 
+                            disabled={isLoading}
+                            className="bg-primary text-white"
                         >
-                            Save Schema
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Publish Schema"}
                         </Button>
                     </div>
                 </div>
             </header>
 
-            <main class="max-w-[1440px] mx-auto px-6 py-8">
+            <main className="max-w-[1440px] mx-auto px-6 py-8">
 
                 <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     {/* Title and Description */}
@@ -110,74 +188,24 @@ const ConfigHeader = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {schemaFields.map((field) => (
-                                <TableRow
-                                    key={field.name}
-                                    className={cn(
-                                        "group transition-colors",
-                                        field.locked ? "bg-slate-50/30 dark:bg-slate-800/20" : "hover:bg-primary/5 dark:hover:bg-primary/10"
-                                    )}
-                                >
-                                    <TableCell className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            {field.locked && <Lock className="w-3.5 h-3.5 text-slate-400" />}
-                                            <code className={cn(
-                                                "font-semibold",
-                                                field.locked ? "text-slate-700 dark:text-slate-300" : "text-slate-900 dark:text-white"
-                                            )}>
-                                                {field.name}
-                                            </code>
-                                        </div>
+                        {allFields.map((field, idx) => (
+                                <TableRow key={idx}>
+                                    <TableCell className="font-mono font-medium">{field.name}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" className={field.typeColor}>{field.type}</Badge>
                                     </TableCell>
-
-                                    <TableCell className="px-6 py-4">
-                                        <Badge
-                                            variant="outline"
-                                            className={cn("rounded-full font-medium", field.typeColor || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}
-                                        >
-                                            {field.type}
-                                        </Badge>
+                                    <TableCell className="text-center">
+                                        {field.required ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-slate-300 mx-auto" />}
                                     </TableCell>
-
-                                    <TableCell className="px-6 py-4 text-center">
-                                        {field.required ? (
-                                            <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto" />
-                                        ) : (
-                                            <XCircle className="w-5 h-5 text-slate-300 mx-auto" />
-                                        )}
-                                    </TableCell>
-
-                                    <TableCell className="px-6 py-4">
-                                        <span className={cn(
-                                            "text-sm font-mono",
-                                            field.default === "null" ? "italic text-slate-400" : "text-slate-600 dark:text-slate-400"
-                                        )}>
-                                            {field.default}
-                                        </span>
-                                    </TableCell>
-
-                                    <TableCell className="px-6 py-4 text-right">
-                                        <div className={cn(
-                                            "flex items-center justify-end space-x-1 transition-opacity",
-                                            !field.locked ? "opacity-0 group-hover:opacity-100" : ""
-                                        )}>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                disabled={field.locked}
-                                                className="h-8 w-8 text-slate-600 hover:text-primary hover:bg-primary/10"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                disabled={field.locked}
-                                                className="h-8 w-8 text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                            >
+                                    <TableCell className="text-slate-500">{field.defaultValue || field.default || 'null'}</TableCell>
+                                    <TableCell className="text-right">
+                                        {!field.locked && (
+                                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => {
+                                                setUserFields(userFields.filter((_, i) => i !== (idx - SYSTEM_FIELDS.length)));
+                                            }}>
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
-                                        </div>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -205,7 +233,7 @@ const ConfigHeader = () => {
                     {infoCards.map((card, index) => (
                         <Card key={index} className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
                             <CardHeader className="flex flex-row items-center space-y-0 gap-2 pb-3">
-                                {card.icon}
+                                {/* {card.icon} */}
                                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                                     {card.title}
                                 </CardTitle>

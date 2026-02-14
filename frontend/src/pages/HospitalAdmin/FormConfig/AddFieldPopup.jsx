@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -20,9 +20,19 @@ import {
 } from "@/components/ui/select";
 import { Settings2, Save } from 'lucide-react';
 
-const FieldConfigPopup = ({ triggerElement }) => {
+const FieldConfigPopup = ({ triggerElement, onSave }) => {
+  const [open, setOpen] = useState(false);
+  const [field, setField] = useState({ name: '', type: 'string', defaultValue: '', required: false });
+
+  const handleSave = () => {
+    if (!field.name) return alert("Field Name is required");
+    onSave(field);
+    setField({ name: '', type: 'string', defaultValue: '', required: false }); // Reset
+    setOpen(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       {/* The trigger can be any button or element passed from the parent */}
       <DialogTrigger asChild>
         {triggerElement || <Button>Configure Field</Button>}
@@ -47,10 +57,10 @@ const FieldConfigPopup = ({ triggerElement }) => {
             <Label htmlFor="name" className="text-sm font-semibold">
               Field Name <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="name"
-              placeholder="e.g. blood_group"
-              className="col-span-3 border-slate-200 dark:border-slate-800 focus-visible:ring-primary"
+            <Input 
+              value={field.name} 
+              onChange={(e) => setField({...field, name: e.target.value})} 
+              placeholder="e.g. blood_group" 
             />
           </div>
 
@@ -59,7 +69,7 @@ const FieldConfigPopup = ({ triggerElement }) => {
             <Label htmlFor="type" className="text-sm font-semibold">
               Data Type
             </Label>
-            <Select defaultValue="string">
+            <Select value={field.type} onValueChange={(val) => setField({...field, type: val})}>
               <SelectTrigger id="type" className="border-slate-200 dark:border-slate-800">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -78,22 +88,17 @@ const FieldConfigPopup = ({ triggerElement }) => {
             <Label htmlFor="default" className="text-sm font-semibold">
               Default Value
             </Label>
-            <Input
-              id="default"
-              placeholder="Leave empty for null"
-              className="col-span-3 border-slate-200 dark:border-slate-800"
+            <Input 
+              value={field.defaultValue} 
+              onChange={(e) => setField({...field, defaultValue: e.target.value})} 
+              placeholder="Optional" 
             />
           </div>
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="ghost" className="font-semibold text-slate-500">
-            Cancel
-          </Button>
-          <Button className="font-bold gap-2 bg-primary hover:bg-primary/90">
-            <Save className="w-4 h-4" />
-            Save Changes
-          </Button>
+        <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+        <Button onClick={handleSave} className="gap-2"><Save className="w-4 h-4" /> Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

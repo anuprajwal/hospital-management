@@ -58,7 +58,7 @@ export default function LoginPage() {
                         <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">The central nervous system for your healthcare facility.</p>
                         <div className="mt-12">
                             <AspectRatio ratio={16 / 10} className="bg-slate-100 rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
-                                <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070" alt="UI" className="object-cover" />
+                                <img src="../../../../public/Logo.jpeg" alt="UI" className="object-cover" />
                             </AspectRatio>
                         </div>
                     </div>
