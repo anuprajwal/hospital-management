@@ -38,3 +38,37 @@ export const fetchAvailableForms = async (moduleId) => {
     if (!response.ok) throw new Error("Failed to fetch forms");
     return await response.json();
 };
+
+export const updateModuleDescription = async (moduleId, description) => {
+    const response = await fetch(`${BASE_URL}/module/edit/${moduleId}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({
+            description
+        }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to update description");
+    }
+    return data;
+};
+
+
+export const toggleModuleStatus = async (moduleId, newStatus) => {
+    const response = await fetch(`${BASE_URL}/module/toggle`, {
+        method: 'PUT', // Assuming POST for an action-based toggle
+        headers: getHeaders(),
+        body: JSON.stringify({
+            status: String(newStatus), // Sending as "true" or "false" string per requirement
+            module_id: moduleId
+        }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to toggle module status");
+    }
+    return data;
+};

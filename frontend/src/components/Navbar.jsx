@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Progress } from "@/components/ui/progress";
 
 const navItems = [
   { name: 'Configure Forms', icon: LayoutDashboard, href: '/', active: true },

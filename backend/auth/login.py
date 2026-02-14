@@ -36,9 +36,8 @@ def loginAccount():
     user = conn.execute('SELECT * FROM users WHERE user_name = ? AND role= ?', (username,role)).fetchone()
     conn.close()
 
-    print(user['password'])
     if user and check_password_hash(user['password'], password):
         jwt = create_jwt(user)
-        return jsonify({"message": "Login successful!", "jwt":jwt}), 200
+        return jsonify({"message": "Login successful!", "jwt":jwt, "user_role":user['role']}), 200
     
     return jsonify({"message": "Invalid credentials"}), 401

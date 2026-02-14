@@ -1,5 +1,15 @@
 import sqlite3
+from werkzeug.security import generate_password_hash
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+super_admin_password = generate_password_hash(os.getenv('SUPER_ADMIN_PASS'))
+
+ACCEPTABLE_MODULES = ['Laboratory','Reception','Doctor', 'Out-Patient', 'Pharmacy', 'In-Patient', 'Billing']
 
 DB_NAME = "project_data.db"
 
@@ -15,13 +25,18 @@ def initialize_database():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_name TEXT NOT NULL,
+            user_name TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            role TEXT NOT NULL CHECK(role IN ('Super_Admin', 'Receptionist', 'Lab_Incharge')),
+            role TEXT NOT NULL CHECK(role IN ('Super_Admin', 'Receptionist', 'Lab_Incharge', 'Admin')),
             status TEXT NOT NULL CHECK(status IN ('Approve', 'Frozen')),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    cursor.execute("""
+    INSERT OR IGNORE INTO users (user_name, password, role, status)
+    VALUES (?, ?, ?, ?)
+""", ('admin', super_admin_password, 'Super_Admin', 'Approve'))
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS forms (
@@ -59,6 +74,9 @@ def initialize_database():
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
 """)
+
+    for module in ACCEPTABLE_MODULES:
+        cursor.execute("INSERT OR IGNORE INTO modules (module_name) VALUES (?)", (module,))
 
 
     connection.commit()

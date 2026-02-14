@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // Added for redirection
 import { 
-    Activity, ShieldCheck, CloudSync, Zap, 
+    Activity, 
     BadgeCheck, Lock, Eye, EyeOff, AlertCircle, CheckCircle2 
 } from "lucide-react";
 import { loginUser } from "./LoginApis"; // Import the service
@@ -17,6 +18,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate(); // Hook for navigation
+    const location = useLocation();
     
     // Form States
     const [formData, setFormData] = useState({
@@ -38,6 +41,13 @@ export default function LoginPage() {
         if (result.ok && result.data.jwt) {
             console.log(result.data)
             localStorage.setItem('user_auth', result.data.jwt);
+            localStorage.setItem('user_role', result.data.user_role);
+
+            const from = location.state?.from?.pathname || "/dashboard";
+
+            setTimeout(() => {
+                navigate(from, { replace: true });
+            }, 500);
         }
         
         setApiResponse(result);
@@ -95,9 +105,9 @@ export default function LoginPage() {
                                                 <SelectValue placeholder="Select your role" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {/* <SelectItem value="doctor">Doctor</SelectItem> */}
+                                                <SelectItem value="Admin">Admin</SelectItem>
                                                 <SelectItem value="Receptionist">Receptionist</SelectItem>
-                                                <SelectItem value="Super_Admin">Administrator</SelectItem>
+                                                <SelectItem value="Super_Admin">System Administrator</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>

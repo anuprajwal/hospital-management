@@ -5,7 +5,7 @@ from backend.FormsManagement.formManagementBlueprint import module_management_bp
 from backend.FormsManagement.helperFunctions import normalize_bool
 
 
-@module_management_bp.route('/module/toggle', methods=['PATCH'])
+@module_management_bp.route('/toggle', methods=['PUT'])
 @token_required
 def toggle_module(current_user_id, current_user_name, current_role):
 

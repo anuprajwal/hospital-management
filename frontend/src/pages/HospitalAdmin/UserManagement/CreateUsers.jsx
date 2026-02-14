@@ -143,6 +143,7 @@ const CreateUserModal = ({ triggerElement }) => {
                   <SelectItem value="Doctor">Doctor / Medical Staff</SelectItem>
                   <SelectItem value="Lab_Incharge">Lab Technician</SelectItem>
                   <SelectItem value="Receptionist">Receptionist</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
