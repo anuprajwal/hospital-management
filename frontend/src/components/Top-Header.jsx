@@ -21,6 +21,9 @@ const TopHeader = () => {
   const [showPassModal, setShowPassModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
 
+  const rawRole = localStorage.getItem('user_role') || 'User';
+  const formattedRole = rawRole.replace(/_/g, ' ');
+
   const handleLogout = () => {
     localStorage.removeItem('user_auth');
     localStorage.removeItem('user_role');
@@ -46,7 +49,7 @@ const TopHeader = () => {
         <div className="flex items-center gap-3">
           {/* User Info */}
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold leading-none">System Admin</p>
+            <p className="text-sm font-bold leading-none">{formattedRole}</p>
             <p className="text-xs text-muted-foreground mt-1">Hospital Admin Panel</p>
           </div>
 

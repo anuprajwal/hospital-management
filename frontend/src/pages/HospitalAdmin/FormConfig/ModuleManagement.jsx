@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import SuperAdminSidebar from "@/components/SuperAdminNavbar"
+import DynamicNavbar from "@/components/DynamicNavbar"
 
 const ModuleManagement = () => {
   const [modules, setModules] = useState([]);
@@ -60,7 +60,7 @@ const ModuleManagement = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 flex">
       {/* Sidebar - Same as before */}
-      <SuperAdminSidebar/>
+      <DynamicNavbar/>
 
       <main className="flex-1 ml-72">
         <header className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-border px-8 py-6 sticky top-0 z-10">

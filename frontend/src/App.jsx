@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import ProtectedRoute from "@/middleware/protectedMiddlewares"; // Import the middleware
 import NotFoundPage from "@/pages/404/NotFound"
 import ModuleManagement from '@/pages/HospitalAdmin/FormConfig/ModuleManagement'
+import AppointmentDashboard from "@/pages/Reception/Appointment/AppointmentDashboard"
 
 function App() {
   return (
@@ -55,8 +56,38 @@ function App() {
             } 
           />
 
+<Route 
+            path="/appointment-dashboard" 
+            element={
+              <ProtectedRoute allowedRoles={['Receptionist']}>
+                <AppointmentDashboard />
+              </ProtectedRoute>
+            } 
+          />
+
           {/* Default Redirects */}
-          {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
+          <Route 
+            path="*" 
+            element={
+              (() => {
+                const userRole = localStorage.getItem('user_role');
+
+                if (userRole === "Super_Admin") {
+                  console.log('returning to module');
+                  return <Navigate to="/module-management" replace />;
+                } else if (userRole === "Admin") {
+                  console.log("returning to dashboard");
+                  return <Navigate to="/dashboard" replace />;
+                }else if (userRole === "Receptionist") {
+                  console.log("returning to appointment");
+                  return <Navigate to="/appointment-dashboard" replace />;
+                }
+                
+                // Fallback for other roles or unauthenticated users
+                return <Navigate to="/login" replace />; 
+              })()
+            } 
+          />
           <Route path="*" element={<NotFoundPage/>} />
         </Routes>
       </Router>

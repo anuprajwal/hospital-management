@@ -14,11 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import TopHeader from "@/components/Top-Header"
-import Sidebar from "@/components/Navbar"
+import Sidebar from "@/components/AdminNavbar"
 import { useNavigate } from 'react-router-dom';
 import { fetchAvailableModules } from './apis';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import DynamicNavbar from "@/components/DynamicNavbar"
 
 const iconMap = {
   "Out-Patient": Stethoscope,
@@ -57,7 +58,7 @@ const HospitalModules = () => {
       <div className="flex h-screen flex-col">
         <TopHeader />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
+          <DynamicNavbar />
           <main className="flex-1 overflow-y-auto p-8 lg:p-12 bg-slate-50/30 dark:bg-transparent">
             <div className="max-w-6xl mx-auto">
 

@@ -42,7 +42,7 @@ def initialize_database():
         CREATE TABLE IF NOT EXISTS forms (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             module_id INTEGER NOT NULL,
-            form_name TEXT NOT NULL,
+            form_name TEXT UNIQUE NOT NULL,
             form_fields TEXT NOT NULL,
             is_allowed INTEGER DEFAULT 1 CHECK(is_allowed IN (0, 1)),
             created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -75,6 +75,13 @@ def initialize_database():
     )
 """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS specialities (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            speciality TEXT UNIQUE NOT NULL
+        )
+    """)
+
     for module in ACCEPTABLE_MODULES:
         cursor.execute("INSERT OR IGNORE INTO modules (module_name) VALUES (?)", (module,))
 
@@ -82,6 +89,7 @@ def initialize_database():
     connection.commit()
     connection.close()
     print(f"[*] Database '{DB_NAME}' is ready (verified/created).")
+    import backend.ReceptionModuleForms
 
 def get_db_connection():
     """Helper to get a connection for routes to use."""

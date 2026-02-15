@@ -11,7 +11,8 @@ from backend.middleware.verifyToken import token_required
 @auth_bp.route('/create-account', methods=['POST'])
 @token_required
 def createAccount(current_user_id, current_user_name, current_role):
-    if (current_role != "Super_Admin"):
+    print(current_role)
+    if (current_role != "Super_Admin" and current_role != "Admin"):
         return jsonify({"error": "user not authorised to create account"}), 400
 
     data = request.json
