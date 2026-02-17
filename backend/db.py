@@ -27,7 +27,7 @@ def initialize_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_name TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            role TEXT NOT NULL CHECK(role IN ('Super_Admin', 'Receptionist', 'Lab_Incharge', 'Admin')),
+            role TEXT NOT NULL CHECK(role IN ('Super_Admin', 'Receptionist', 'Lab_Incharge', 'Admin', 'Doctor')),
             status TEXT NOT NULL CHECK(status IN ('Approve', 'Frozen')),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
@@ -64,14 +64,47 @@ def initialize_database():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS outPatient (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            patient_name TEXT NOT NULL,
+            form_data TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Created' CHECK(status IN ('Created', 'Visiting', 'Deleted', 'Discharged')),
+            created_on DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS inPatient (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patient_name TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            form_data TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Created' CHECK(status IN ('Created', 'Visiting', 'Deleted', 'Discharged')),
+            created_on DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS modules (
+        CREATE TABLE IF NOT EXISTS modules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            is_allowed INTEGER NOT NULL DEFAULT 0 CHECK (is_allowed IN (0,1)),
+            module_name TEXT UNIQUE NOT NULL CHECK (module_name IN ('Laboratory','Reception','Doctor', 'Out-Patient', 'Pharmacy', 'In-Patient', 'Billing')),
+            description TEXT CHECK (length(description) <= 200),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS doctor_details (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        is_allowed INTEGER NOT NULL DEFAULT 0 CHECK (is_allowed IN (0,1)),
-        module_name TEXT UNIQUE NOT NULL CHECK (module_name IN ('Laboratory','Reception','Doctor', 'Out-Patient', 'Pharmacy', 'In-Patient', 'Billing')),
-        description TEXT CHECK (length(description) <= 200),
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        user_id INTEGER NOT NULL UNIQUE,
+        licence_number TEXT NOT NULL UNIQUE,        
+        documents TEXT, 
+        phone_number TEXT NOT NULL,
+        created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+        
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
     )
 """)
 

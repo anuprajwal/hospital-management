@@ -13,10 +13,10 @@ user_list = [row[0] for row in user_rows] # Extract the first column (user_name)
 print(f"Users found: {user_list}")
 
 # 2. Fetch Specialities
-cursor.execute("SELECT speciality FROM specialities")
-spec_rows = cursor.fetchall() # Get all rows once
-spec_list = [row[0] for row in spec_rows] # Extract the first column (speciality)
-print(f"Specialities found: {spec_list}")
+cursor.execute("SELECT user_name FROM users WHERE role = 'Doctor' and status = 'Approve'")
+doc_rows = cursor.fetchall() # Get all rows once
+doc_list = [row[0] for row in doc_rows] # Extract the first column (speciality)
+print(f"Specialities found: {doc_list}")
 
 form_structure = [
     {"label": "Sur name", "type": "String", "required": True},
@@ -27,7 +27,7 @@ form_structure = [
     {"label": "appointment type", "type": "Dropdown", "options": ["Consultation", "Diagnosis", "Operation"], "required": False},
     {"label": "date", "type": "Date", "required": True},
     {"label": "time", "type": "Time", "required": True},
-    {"label": "speciality", "type": "Dropdown", "options": spec_list, "required": False},
+    {"label": "doctor", "type": "Dropdown", "options": doc_list, "required": False},
     {"label": "clinical description", "type": "Text", "required": False},
     {"label": "referer", "type": "Dropdown", "options": user_list, "required": False}
 ]
@@ -44,7 +44,7 @@ try:
             ?, 
             1
         )
-    """, ("In-Patient", json_fields))
+    """, ("Out-Patient", json_fields))
 
     conn.commit()
     print("In-Patient form created successfully under the Reception module.")
