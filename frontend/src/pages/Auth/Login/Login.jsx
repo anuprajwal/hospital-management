@@ -108,6 +108,7 @@ export default function LoginPage() {
                                                 <SelectItem value="Admin">Admin</SelectItem>
                                                 <SelectItem value="Receptionist">Receptionist</SelectItem>
                                                 <SelectItem value="Super_Admin">System Administrator</SelectItem>
+                                                <SelectItem value="Doctor">Doctor</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>

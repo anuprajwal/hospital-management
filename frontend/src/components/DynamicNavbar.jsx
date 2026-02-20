@@ -13,6 +13,8 @@ const DynamicNavbar = () => {
       return <AdminSidebar />;
     case 'Receptionist':
       return <ReceptionistSidebar/>
+    case 'Doctor':
+      return <ReceptionistSidebar/>
     default:
       return <Sidebar />;
   }

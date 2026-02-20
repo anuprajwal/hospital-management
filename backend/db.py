@@ -115,6 +115,43 @@ def initialize_database():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patient_id INTEGER NOT NULL,
+            lab_technician_id INTEGER,
+            test_cost REAL NOT NULL DEFAULT 0.0,
+            test_results TEXT,
+            status TEXT NOT NULL CHECK(status IN ('recommended', 'payment done', 'cancelled', 'test processing', 'test completed')),
+            created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (patient_id) REFERENCES outPatient(id) ON DELETE CASCADE,
+            FOREIGN KEY (lab_technician_id) REFERENCES users(id)
+        );
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS prescriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patient_id INTEGER NOT NULL,
+            doctor_id INTEGER NOT NULL,
+            prescription TEXT NOT NULL,
+            created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (patient_id) REFERENCES outPatient(id) ON DELETE CASCADE,
+            FOREIGN KEY (doctor_id) REFERENCES users(id)
+        );
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS pricing (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            price REAL NOT NULL,
+            description TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
+
     for module in ACCEPTABLE_MODULES:
         cursor.execute("INSERT OR IGNORE INTO modules (module_name) VALUES (?)", (module,))
 

@@ -6,7 +6,6 @@ import {
   Droplets,
   Activity,
   Box,
-  Trash2,
   X,
   Info,
   Lightbulb,
@@ -23,7 +22,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 
 const availableTests = [
   { id: 'blood', name: 'Blood Test (Full Count)', sub: 'Standard Hematology', icon: <Droplets className="size-5" /> },

@@ -13,7 +13,7 @@ const navItems = [
   { name: 'Configure Forms', icon: LayoutDashboard, href: '/', active: true },
   { name: 'Acconunts Management', icon: Users, href: '/users' },
 //   { name: 'Permissions', icon: ShieldCheck, href: '#' },
-//   { name: 'Database Logs', icon: Database, href: '#' },
+  { name: 'Pricing', icon: Database, href: '/view-prices' },
 //   { name: 'Backup', icon: CloudUpload, href: '#' },
 ];
 

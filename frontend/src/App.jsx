@@ -5,10 +5,15 @@ import HospitalModules from "./pages/HospitalAdmin/FormConfig/FormConfigHome";
 import ConfigHeader from "./pages/HospitalAdmin/FormConfig/EachForm.jsx";
 import UserManagement from "./pages/HospitalAdmin/UserManagement/UsersHomePage";
 import { Toaster } from "@/components/ui/sonner";
-import ProtectedRoute from "@/middleware/protectedMiddlewares"; // Import the middleware
+import ProtectedRoute from "@/middleware/protectedMiddlewares";
 import NotFoundPage from "@/pages/404/NotFound"
 import ModuleManagement from '@/pages/HospitalAdmin/FormConfig/ModuleManagement'
 import AppointmentDashboard from "@/pages/Reception/Appointment/AppointmentDashboard"
+import DoctorPanel from "@/pages/Doctor/AppointmentCardsView"
+import PatientDetailView from "@/pages/Doctor/DetailedAppointment"
+import CreatePricing from "@/pages/HospitalAdmin/Pricing/CreatePrices"
+import PricingManagement from "@/pages/HospitalAdmin/Pricing/ViewPrices"
+import EditPricing from "@/pages/HospitalAdmin/Pricing/EditPrices"
 
 function App() {
   return (
@@ -55,12 +60,57 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          
+          <Route 
+            path="/create-price" 
+            element={
+              <ProtectedRoute allowedRoles={['Admin']}>
+                <CreatePricing />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/view-prices" 
+            element={
+              <ProtectedRoute allowedRoles={['Admin']}>
+                <PricingManagement />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/edit-price" 
+            element={
+              <ProtectedRoute allowedRoles={['Admin']}>
+                <EditPricing />
+              </ProtectedRoute>
+            } 
+          />
 
-<Route 
+          <Route 
             path="/appointment-dashboard" 
             element={
               <ProtectedRoute allowedRoles={['Receptionist']}>
                 <AppointmentDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/doctor-appointments" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <DoctorPanel />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/detailed-appointment" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <PatientDetailView />
               </ProtectedRoute>
             } 
           />
@@ -81,6 +131,9 @@ function App() {
                 }else if (userRole === "Receptionist") {
                   console.log("returning to appointment");
                   return <Navigate to="/appointment-dashboard" replace />;
+                }else if (userRole === "Doctor") {
+                  console.log("returning to Doctor dashboard");
+                  return <Navigate to="/doctor-appointments" replace />;
                 }
                 
                 // Fallback for other roles or unauthenticated users
