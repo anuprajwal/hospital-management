@@ -16,16 +16,17 @@ VALID_TEST_STATUSES = [
 ]
 
 
-@patient_management_bp.route('/tests', methods=['POST'])
+@patient_management_bp.route('/create-tests', methods=['POST'])
 @token_required
 def create_test(current_user_id, current_user_name, current_user_role):
     data = request.json
 
-    if not data or "patient_id" not in data or "test_cost" not in data:
+    if not data or "patient_id" not in data or "test_cost" not in data or "test_name" not in data:
         return jsonify({"error": "patient_id and test_cost are required"}), 400
 
     patient_id = data.get("patient_id")
     test_cost = data.get("test_cost")
+    test_name = data.get("test_name")
 
     conn = get_db_connection()
 
@@ -33,11 +34,12 @@ def create_test(current_user_id, current_user_name, current_user_role):
         cursor = conn.cursor()
 
         cursor.execute("""
-            INSERT INTO tests (patient_id, lab_technician_id, test_cost, status)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO tests (patient_id, lab_technician_id, test_name, test_cost, status)
+            VALUES (?, ?, ?, ?, ?)
         """, (
             patient_id,
             None,
+            test_name,
             test_cost,
             "recommended"
         ))
@@ -60,7 +62,7 @@ def create_test(current_user_id, current_user_name, current_user_role):
 
 
 
-@patient_management_bp.route('/tests/<int:test_id>', methods=['PUT'])
+@patient_management_bp.route('/edit-test/<int:test_id>', methods=['PUT'])
 @token_required
 def update_test(current_user_id, current_user_name, current_user_role, test_id):
     data = request.json
@@ -126,7 +128,7 @@ def update_test(current_user_id, current_user_name, current_user_role, test_id):
 
 
 
-@patient_management_bp.route('/tests', methods=['GET'])
+@patient_management_bp.route('/get-tests', methods=['GET'])
 @token_required
 def get_tests(current_user_id, current_user_name, current_user_role):
 
@@ -139,7 +141,7 @@ def get_tests(current_user_id, current_user_name, current_user_role):
         cursor = conn.cursor()
 
         query = """
-            SELECT id, patient_id, lab_technician_id, test_cost,
+            SELECT id, patient_id, lab_technician_id, test_cost, test_name,
                    test_results, status, created_on
             FROM tests
             WHERE 1=1
@@ -167,9 +169,10 @@ def get_tests(current_user_id, current_user_name, current_user_role):
                 "patient_id": row[1],
                 "lab_technician_id": row[2],
                 "test_cost": row[3],
-                "test_results": json.loads(row[4]) if row[4] else None,
-                "status": row[5],
-                "created_on": row[6]
+                "test_name": row[4],
+                "test_results": json.loads(row[5]) if row[5] else None,
+                "status": row[6],
+                "created_on": row[7]
             })
 
         return jsonify(tests), 200
@@ -182,7 +185,7 @@ def get_tests(current_user_id, current_user_name, current_user_role):
 
 
 
-@patient_management_bp.route('/tests/<int:test_id>', methods=['DELETE'])
+@patient_management_bp.route('/delete-test/<int:test_id>', methods=['DELETE'])
 @token_required
 def delete_test(current_user_id, current_user_name, current_user_role, test_id):
 

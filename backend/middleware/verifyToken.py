@@ -22,6 +22,7 @@ def token_required(f):
             current_role = data['role']
         except Exception as e:
             return jsonify({'message': 'Token is invalid or expired!'}), 401
+        print("midd ware checked............")
 
         return f(current_user_id, current_user_name, current_role, *args, **kwargs)
 

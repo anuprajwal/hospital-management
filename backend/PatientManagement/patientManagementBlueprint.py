@@ -6,4 +6,4 @@ patient_management_bp = Blueprint('patientManagement', __name__)
 print('Patient management blueprint loaded')
 
 
-from backend.PatientManagement.outPatientModule import get_outpatients, create_outpatient
+from backend.PatientManagement import outPatientModule, prescriptionManagement, testManagement

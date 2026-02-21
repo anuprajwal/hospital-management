@@ -120,6 +120,7 @@ def initialize_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             patient_id INTEGER NOT NULL,
             lab_technician_id INTEGER,
+            test_name TEXT NOT NULL,
             test_cost REAL NOT NULL DEFAULT 0.0,
             test_results TEXT,
             status TEXT NOT NULL CHECK(status IN ('recommended', 'payment done', 'cancelled', 'test processing', 'test completed')),
@@ -145,7 +146,8 @@ def initialize_database():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS pricing (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
+            name TEXT NOT NULL UNIQUE,
+            status INTEGER NOT NULL CHECK(status IN (0, 1)), 
             price REAL NOT NULL,
             description TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP

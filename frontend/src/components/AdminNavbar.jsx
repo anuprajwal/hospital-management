@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 const navItems = [
   { name: 'Configure Forms', icon: LayoutDashboard, href: '/', active: true },
   { name: 'Acconunts Management', icon: Users, href: '/users' },
-//   { name: 'Permissions', icon: ShieldCheck, href: '#' },
+  { name: 'Create-Price', icon: ShieldCheck, href: '/create-price' },
   { name: 'Pricing', icon: Database, href: '/view-prices' },
 //   { name: 'Backup', icon: CloudUpload, href: '#' },
 ];

@@ -6,7 +6,7 @@ from backend.PatientManagement.patientManagementBlueprint import patient_managem
 
 
 
-@patient_management_bp.route('/prescriptions', methods=['POST'])
+@patient_management_bp.route('/create-prescription', methods=['POST'])
 @token_required
 def create_prescription(current_user_id, current_user_name, current_user_role):
     data = request.json
@@ -49,7 +49,7 @@ def create_prescription(current_user_id, current_user_name, current_user_role):
 
 
 
-@patient_management_bp.route('/prescriptions/<int:prescription_id>', methods=['PUT'])
+@patient_management_bp.route('/edit-prescription/<int:prescription_id>', methods=['PUT'])
 @token_required
 def update_prescription(current_user_id, current_user_name, current_user_role, prescription_id):
     data = request.json
@@ -127,7 +127,7 @@ def get_prescriptions(current_user_id, current_user_name, current_user_role, pat
 
 
 
-@patient_management_bp.route('/prescriptions/<int:prescription_id>', methods=['DELETE'])
+@patient_management_bp.route('/delete-prescription/<int:prescription_id>', methods=['DELETE'])
 @token_required
 def delete_prescription(current_user_id, current_user_name, current_user_role, prescription_id):
 

@@ -7,6 +7,7 @@ from backend.auth.authBlueprint import auth_bp
 from backend.UsersManagement.usersBlueprint import user_management_bp
 from backend.FormsManagement.formManagementBlueprint import module_management_bp
 from backend.PatientManagement.patientManagementBlueprint import patient_management_bp
+from backend.PricingManagement.pricingManagementBlueprint import pricing_management_bp
 
 
 
@@ -26,6 +27,7 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(user_management_bp, url_prefix='/users')
 app.register_blueprint(module_management_bp, url_prefix='/module')
 app.register_blueprint(patient_management_bp, url_prefix='/patient')
+app.register_blueprint(pricing_management_bp, url_prefix='/price')
 
 print(app.url_map)
 
