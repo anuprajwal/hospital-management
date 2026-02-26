@@ -135,51 +135,101 @@ def get_tests(current_user_id, current_user_name, current_user_role):
     patient_id = request.args.get("patient_id")
     statuses = request.args.getlist("status")
 
+    # 🔹 Pagination params
+    page = request.args.get("page", 1)
+    limit = request.args.get("limit", 10)
+
+    # Validate pagination
+    try:
+        page = int(page)
+        limit = int(limit)
+
+        if page < 1 or limit < 1:
+            raise ValueError
+
+    except ValueError:
+        return jsonify({
+            "error": "page and limit must be positive integers"
+        }), 400
+
+    offset = (page - 1) * limit
+
     conn = get_db_connection()
 
     try:
         cursor = conn.cursor()
 
-        query = """
-            SELECT id, patient_id, lab_technician_id, test_cost, test_name,
-                   test_results, status, created_on
+        base_query = """
             FROM tests
             WHERE 1=1
         """
 
         values = []
 
+        # 🔹 Patient filter
         if patient_id:
-            query += " AND patient_id = ?"
+            base_query += " AND patient_id = ?"
             values.append(patient_id)
 
+        # 🔹 Status filter
         if statuses:
-            query += f" AND status IN ({','.join(['?'] * len(statuses))})"
+            placeholders = ",".join(["?"] * len(statuses))
+            base_query += f" AND status IN ({placeholders})"
             values.extend(statuses)
 
-        query += " ORDER BY created_on DESC"
+        # 🔹 Get total count (before pagination)
+        count_query = "SELECT COUNT(*) " + base_query
+        cursor.execute(count_query, values)
+        total_records = cursor.fetchone()[0]
 
-        cursor.execute(query, values)
+        # 🔹 Main query with pagination
+        data_query = """
+            SELECT id, patient_id, lab_technician_id, test_cost,
+                   test_name, test_results, status, created_on
+        """ + base_query + """
+            ORDER BY created_on DESC
+            LIMIT ? OFFSET ?
+        """
+
+        final_values = values + [limit, offset]
+
+        cursor.execute(data_query, final_values)
         rows = cursor.fetchall()
 
         tests = []
+
         for row in rows:
+
+            # Safe JSON parsing
+            try:
+                test_results = json.loads(row[5]) if row[5] and row[5].strip() else None
+            except (json.JSONDecodeError, TypeError):
+                test_results = row[5]
+
             tests.append({
                 "id": row[0],
                 "patient_id": row[1],
                 "lab_technician_id": row[2],
                 "test_cost": row[3],
                 "test_name": row[4],
-                "test_results": json.loads(row[5]) if row[5] else None,
+                "test_results": test_results,
                 "status": row[6],
                 "created_on": row[7]
             })
 
-        return jsonify(tests), 200
+        return jsonify({
+            "page": page,
+            "limit": limit,
+            "total_records": total_records,
+            "total_pages": (total_records + limit - 1) // limit,
+            "data": tests
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
     finally:
         conn.close()
-
 
 
 

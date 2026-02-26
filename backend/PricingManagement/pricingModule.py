@@ -3,209 +3,263 @@ from backend.db import get_db_connection
 import sqlite3
 from backend.middleware.verifyToken import token_required
 from backend.PricingManagement.pricingManagementBlueprint import pricing_management_bp
+import json
 
 
 
 
-@pricing_management_bp.route('/create-price', methods=['POST'])
+@pricing_management_bp.route('/create-test', methods=['POST'])
 @token_required
-def create_pricing(current_user_id, current_user_name, current_user_role):
-    if current_user_role != "Admin":
-        return jsonify({"error": "Only Admin can create pricing"}), 403
+def create_test(current_user_id, current_user_name, current_user_role):
 
-    data = request.json
+    data = request.get_json()
 
-    print("checkpoint1")
+    name = data.get("name")
+    category = data.get("category")
+    status = data.get("status")
+    price = data.get("price")
+    description = data.get("description")
+    parameters = data.get("parameters")
 
-    if not data or "name" not in data or "price" not in data:
-        return jsonify({"error": "name and price are required"}), 400
-
-    name = data.get("name").strip()
-    price = int(data.get("price"))
-    description = data.get("description", "")
-    status = data.get("status", True)  # default True
-
-    # Validate price
-    if not isinstance(price, (int, float)) or price < 0:
-        return jsonify({"error": "Invalid price value"}), 400
-
-    # Validate status
-    if not isinstance(status, bool):
-        return jsonify({"error": "status must be boolean"}), 400
+    if isinstance(parameters, list):
+        parameters = json.dumps(parameters)
 
     conn = get_db_connection()
 
     try:
         cursor = conn.cursor()
-
         cursor.execute("""
-            INSERT INTO pricing (name, price, description, status)
-            VALUES (?, ?, ?, ?)
-        """, (
-            name,
-            float(price),
-            description,
-            int(status)
-        ))
+            INSERT INTO available_test 
+            (name, category, status, price, description, parameters)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (name, category, status, price, description, parameters))
 
         conn.commit()
 
-        return jsonify({
-            "message": "Pricing created successfully",
-            "pricing_id": cursor.lastrowid
-        }), 201
+        return jsonify({"message": "Test created successfully"}), 201
 
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 500
+    except sqlite3.IntegrityError as e:
+        return jsonify({"error": str(e)}), 400
 
     finally:
         conn.close()
 
 
-
-
-@pricing_management_bp.route('/edit-price/<int:pricing_id>', methods=['PUT'])
+@pricing_management_bp.route('/update-test/<int:test_id>', methods=['PUT'])
 @token_required
-def update_pricing(current_user_id, current_user_name, current_user_role, pricing_id):
-    if current_user_role != "Admin":
-        return jsonify({"error": "Only Admin can update pricing"}), 403
+def update_test(current_user_id, current_user_name, current_user_role, test_id):
 
-    data = request.json
+    data = request.get_json()
 
-    if not data:
-        return jsonify({"error": "Request body required"}), 400
+    allowed_fields = [
+        "name", "category", "status",
+        "price", "description", "parameters"
+    ]
 
-    fields = []
-    values = []
+    updates = []
+    params = []
 
-    if "name" in data:
-        fields.append("name = ?")
-        values.append(data.get("name").strip())
+    for field in allowed_fields:
+        if field in data:
 
-    if "price" in data:
-        price = int(data.get("price"))
-        if not isinstance(price, (int, float)) or price < 0:
-            return jsonify({"error": "Invalid price value"}), 400
-        fields.append("price = ?")
-        values.append(float(price))
+            value = data[field]
 
-    if "description" in data:
-        fields.append("description = ?")
-        values.append(data.get("description"))
+            # Validate category
+            if field == "category":
+                if value not in ["laboratory_tests", "package"]:
+                    return jsonify({"error": "Invalid category"}), 400
 
-    if "status" in data:
-        status = data.get("status")
-        if not isinstance(status, bool):
-            return jsonify({"error": "status must be boolean"}), 400
-        fields.append("status = ?")
-        values.append(int(status))
+            # Validate status
+            if field == "status":
+                if value not in [0, 1]:
+                    return jsonify({"error": "Invalid status"}), 400
 
-    if not fields:
-        return jsonify({"error": "Nothing to update"}), 400
+            # Convert parameters list → JSON
+            if field == "parameters":
+                if isinstance(value, list):
+                    value = json.dumps(value)
+                elif value is not None:
+                    return jsonify({"error": "Parameters must be a list"}), 400
 
-    values.append(pricing_id)
+            updates.append(f"{field} = ?")
+            params.append(value)
+
+    if not updates:
+        return jsonify({"error": "No valid fields to update"}), 400
+
+    params.append(test_id)
+
+    query = f"""
+        UPDATE available_test
+        SET {', '.join(updates)}
+        WHERE id = ?
+    """
+
+    conn = get_db_connection()
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Test not found"}), 404
+
+        return jsonify({"message": "Test updated successfully"}), 200
+
+    finally:
+        conn.close()
+
+
+@pricing_management_bp.route('/get-tests', methods=['GET'])
+@token_required
+def get_tests(current_user_id, current_user_name, current_user_role):
+
+    name = request.args.get("name")
+    category = request.args.get("category")
+    status = request.args.get("status")
+    min_price = request.args.get("min_price")
+    max_price = request.args.get("max_price")
+    created_from = request.args.get("created_from")
+    created_to = request.args.get("created_to")
+
+    page = int(request.args.get("page", 1))
+    limit = int(request.args.get("limit", 10))
+    sort_by = request.args.get("sort_by", "created_at")
+    order = request.args.get("order", "desc").lower()
+
+    offset = (page - 1) * limit
+
+    valid_sort_columns = [
+        "id", "name", "category",
+        "status", "price", "created_at"
+    ]
+
+    if sort_by not in valid_sort_columns:
+        return jsonify({"error": "Invalid sort column"}), 400
+
+    if order not in ["asc", "desc"]:
+        return jsonify({"error": "Invalid order"}), 400
+
+    query = "SELECT * FROM available_test WHERE 1=1"
+    count_query = "SELECT COUNT(*) FROM available_test WHERE 1=1"
+    params = []
+
+    # Filters
+
+    if name:
+        query += " AND name LIKE ?"
+        count_query += " AND name LIKE ?"
+        params.append(f"%{name}%")
+
+    if category:
+        query += " AND category = ?"
+        count_query += " AND category = ?"
+        params.append(category)
+
+    if status is not None:
+
+        status_str = str(status).strip().lower()
+
+        if status_str in ["1", "true"]:
+            status_value = 1
+        elif status_str in ["0", "false"]:
+            status_value = 0
+        else:
+            return jsonify({
+                "error": "Invalid status filter. Use 0, 1, true, or false."
+            }), 400
+
+        query += " AND status = ?"
+        count_query += " AND status = ?"
+        params.append(status_value)
+
+    if min_price:
+        try:
+            min_price = float(min_price)
+            query += " AND price >= ?"
+            count_query += " AND price >= ?"
+            params.append(min_price)
+        except ValueError:
+            return jsonify({"error": "Invalid min_price"}), 400
+
+    if max_price:
+        try:
+            max_price = float(max_price)
+            query += " AND price <= ?"
+            count_query += " AND price <= ?"
+            params.append(max_price)
+        except ValueError:
+            return jsonify({"error": "Invalid max_price"}), 400
+
+    if created_from:
+        query += " AND created_at >= ?"
+        count_query += " AND created_at >= ?"
+        params.append(created_from)
+
+    if created_to:
+        query += " AND created_at <= ?"
+        count_query += " AND created_at <= ?"
+        params.append(created_to)
+
+    query += f" ORDER BY {sort_by} {order}"
+    query += " LIMIT ? OFFSET ?"
 
     conn = get_db_connection()
 
     try:
         cursor = conn.cursor()
 
-        query = f"""
-            UPDATE pricing
-            SET {", ".join(fields)}
-            WHERE id = ?
-        """
+        # Total count
+        cursor.execute(count_query, params)
+        total_records = cursor.fetchone()[0]
 
-        result = cursor.execute(query, values)
-
-        if result.rowcount == 0:
-            return jsonify({"error": "Pricing record not found"}), 404
-
-        conn.commit()
-
-        return jsonify({"message": "Pricing updated successfully"}), 200
-
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        conn.close()
-
-
-
-
-@pricing_management_bp.route('/get-prices', methods=['GET'])
-@token_required
-def get_pricing(current_user_id, current_user_name, current_user_role):
-    name_filter = request.args.get("name")
-    status_filter = request.args.get("status")
-
-    conn = get_db_connection()
-
-    try:
-        cursor = conn.cursor()
-
-        query = """
-            SELECT id, name, price, description, status, created_at
-            FROM pricing
-            WHERE 1=1
-        """
-
-        values = []
-
-        # 🔹 Name filter
-        if name_filter:
-            query += " AND name LIKE ?"
-            values.append(f"%{name_filter}%")
-
-        # 🔹 Status filter
-        if status_filter is not None and status_filter.strip().lower() != "all" and status_filter.strip() != "":
-            status_filter = status_filter.strip().lower()
-
-            if status_filter in ["true", "1"]:
-                parsed_status = 1
-            elif status_filter in ["false", "0"]:
-                parsed_status = 0
-            else:
-                return jsonify({
-                    "error": "Invalid status value. Use true/false/1/0/all."
-                }), 400
-
-            query += " AND status = ?"
-            values.append(parsed_status)
-
-        query += " ORDER BY created_at DESC"
-
-        cursor.execute(query, values)
+        # Paginated query
+        cursor.execute(query, params + [limit, offset])
         rows = cursor.fetchall()
 
-        pricing_list = []
-
+        tests = []
         for row in rows:
-            pricing_list.append({
-                "id": row[0],
-                "name": row[1],
-                "price": row[2],
-                "description": row[3],
-                "status": bool(row[4]),
-                "created_at": row[5]
-            })
+            test = dict(row)
 
-        return jsonify(pricing_list), 200
+            # Convert JSON string → list
+            if test.get("parameters"):
+                try:
+                    test["parameters"] = json.loads(test["parameters"])
+                except:
+                    test["parameters"] = []
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+            tests.append(test)
+
+        return jsonify({
+            "total_records": total_records,
+            "page": page,
+            "limit": limit,
+            "total_pages": (total_records + limit - 1) // limit,
+            "data": tests
+        }), 200
 
     finally:
         conn.close()
 
-
-
-@pricing_management_bp.route('/delete-prices/<int:pricing_id>', methods=['DELETE'])
+@pricing_management_bp.route('/delete-test/<int:test_id>', methods=['DELETE'])
 @token_required
-def delete_pricing(current_user_id, current_user_name, current_user_role, pricing_id):
+def delete_test(current_user_id, current_user_name, current_user_role, test_id):
+
+    conn = get_db_connection()
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM available_test WHERE id = ?", (test_id,))
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Test not found"}), 404
+
+        return jsonify({"message": "Test deleted successfully"}), 200
+
+    finally:
+        conn.close()
 
     if current_user_role != "Admin":
         return jsonify({"error": "Only Admin can delete pricing"}), 403

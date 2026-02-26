@@ -143,15 +143,18 @@ def initialize_database():
             FOREIGN KEY (doctor_id) REFERENCES users(id)
         );
     """)
+
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS pricing (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
-            status INTEGER NOT NULL CHECK(status IN (0, 1)), 
-            price REAL NOT NULL,
-            description TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
+        CREATE TABLE IF NOT EXISTS available_test (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        category TEXT NOT NULL CHECK(category IN ('laboratory_tests', 'package')), 
+        status INTEGER NOT NULL CHECK(status IN (0, 1)), 
+        price REAL NOT NULL,
+        description TEXT,
+        parameters TEXT, 
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
     """)
 
     for module in ACCEPTABLE_MODULES:

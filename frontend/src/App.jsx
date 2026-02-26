@@ -14,6 +14,10 @@ import PatientDetailView from "@/pages/Doctor/DetailedAppointment"
 import CreatePricing from "@/pages/HospitalAdmin/Pricing/CreatePrices"
 import PricingManagement from "@/pages/HospitalAdmin/Pricing/ViewPrices"
 import EditPricing from "@/pages/HospitalAdmin/Pricing/EditPrices"
+import LabTestPanel from "@/pages/Laboratory/TestsStackPage"
+import LabReportView from "@/pages/Laboratory/ReportsView"
+import LabTestEntry from "@/pages/Laboratory/EditReports"
+import TestResultsView from "@/pages/Doctor/ViewReports"
 
 function App() {
   return (
@@ -114,7 +118,42 @@ function App() {
               </ProtectedRoute>
             } 
           />
-
+          
+          <Route 
+            path="/test-results-view" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <TestResultsView />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/tests-dashboard" 
+            element={
+              <ProtectedRoute allowedRoles={['Lab_Incharge']}>
+                <LabTestPanel />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/view-test-result" 
+            element={
+              <ProtectedRoute allowedRoles={['Lab_Incharge']}>
+                <LabReportView />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/test-entry"
+            element={
+              <ProtectedRoute allowedRoles={['Lab_Incharge']}>
+                <LabTestEntry />
+              </ProtectedRoute>
+            } 
+          />
           {/* Default Redirects */}
           <Route 
             path="*" 
@@ -134,6 +173,9 @@ function App() {
                 }else if (userRole === "Doctor") {
                   console.log("returning to Doctor dashboard");
                   return <Navigate to="/doctor-appointments" replace />;
+                }else if (userRole === "Lab_Incharge") {
+                  console.log("returning to Lab_Incharge dashboard");
+                  return <Navigate to="/tests-dashboard" replace />;
                 }
                 
                 // Fallback for other roles or unauthenticated users

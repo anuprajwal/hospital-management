@@ -17,11 +17,23 @@ export const createTests = async (testData) => {
     return await response.json();
 };
 
-export const getTests = async () => {
-    const response = await fetch(`${BASE_URL}/get-tests`, {
+// apis.js
+
+export const getTests = async (params = {}) => {
+    const queryParams = new URLSearchParams();
+
+    // 🔹 Required for your controller to filter by patient
+    if (params.patient_id) queryParams.append("patient_id", params.patient_id);
+
+    // 🔹 Pagination (Ensure they are positive integers as per controller validation)
+    queryParams.append("page", Math.max(1, parseInt(params.page || 1)));
+    queryParams.append("limit", Math.max(1, parseInt(params.limit || 10)));
+
+    const response = await fetch(`${BASE_URL}/get-tests?${queryParams.toString()}`, {
         method: "GET",
         headers: getAuthHeader(),
     });
+
     return await response.json();
 };
 

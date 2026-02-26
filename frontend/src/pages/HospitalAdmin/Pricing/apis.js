@@ -10,12 +10,8 @@ const getAuthHeader = () => {
 
 export const getPrices = async (page = 1, limit = 10, name = '', status = '') => {
     // Convert boolean/all status to API expected true/false
-    let statusQuery = '';
-    if (status === 'active') statusQuery = 'true';
-    if (status === 'inactive') statusQuery = 'false';
-
     const response = await fetch(
-        `${BASE_URL}/get-prices?page=${page}&limit=${limit}&name=${name}&status=${statusQuery}`, {
+        `${BASE_URL}/get-tests?page=${page}&limit=${limit}&name=${name}&status=${status}`, {
             headers: getAuthHeader()
         }
     );
@@ -23,7 +19,7 @@ export const getPrices = async (page = 1, limit = 10, name = '', status = '') =>
 };
 
 export const createPrice = async (data) => {
-    const response = await fetch(`${BASE_URL}/create-price`, {
+    const response = await fetch(`${BASE_URL}/create-test`, {
         method: "POST",
         headers: getAuthHeader(),
         body: JSON.stringify(data),
@@ -32,7 +28,7 @@ export const createPrice = async (data) => {
 };
 
 export const editPrice = async (pricing_id, data) => {
-    const response = await fetch(`${BASE_URL}/edit-price/${pricing_id}`, {
+    const response = await fetch(`${BASE_URL}/edit-test/${pricing_id}`, {
         method: "PUT",
         headers: getAuthHeader(),
         body: JSON.stringify(data),
@@ -41,7 +37,7 @@ export const editPrice = async (pricing_id, data) => {
 };
 
 export const deletePrice = async (pricing_id) => {
-    const response = await fetch(`${BASE_URL}/delete-prices/${pricing_id}`, {
+    const response = await fetch(`${BASE_URL}/delete-test/${pricing_id}`, {
         method: "DELETE",
         headers: getAuthHeader(),
     });
