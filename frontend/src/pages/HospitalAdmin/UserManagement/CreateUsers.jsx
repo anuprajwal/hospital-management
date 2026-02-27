@@ -40,6 +40,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {createAccount} from "./apis"
 
 const CreateUserModal = ({ triggerElement }) => {
+  const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
@@ -53,6 +54,10 @@ const CreateUserModal = ({ triggerElement }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.role?.trim()) {
+      setApiResponse({ ok: false, status: 400, data: { error: "Please select a user role." } });
+      return;
+    }
     setIsLoading(true);
     setApiResponse(null);
 
@@ -62,7 +67,7 @@ const CreateUserModal = ({ triggerElement }) => {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {triggerElement || (
           <Button className="gap-2 font-bold shadow-lg shadow-primary/20">
@@ -72,20 +77,16 @@ const CreateUserModal = ({ triggerElement }) => {
         )}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden border-slate-200 dark:border-slate-800">
-        {/* Modal Header */}
-        <DialogHeader className="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
-          <DialogTitle className="text-xl font-bold tracking-tight">Create New User</DialogTitle>
+      <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden">
+        <DialogHeader className="px-6 py-4 border-b border-border">
+          <DialogTitle className="text-lg font-semibold">Create user</DialogTitle>
         </DialogHeader>
 
         <div className="p-6">
-          {/* High Security Notice */}
-          <Alert className="bg-primary/10 border-primary/20 mb-6 flex items-start gap-1">
-            <ShieldAlert className="w-5 h-5 text-primary mt-0.5" />
-            <AlertDescription className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed ml-2">
-              High Security Notice: <span className="text-slate-500 dark:text-slate-400 font-normal">
-                Password will not be visible again after creation. Please ensure it is recorded safely.
-              </span>
+          <Alert className="mb-5 bg-primary/10 border-primary/20">
+            <ShieldAlert className="h-4 w-4 text-primary" />
+            <AlertDescription className="text-sm">
+              Password cannot be viewed again after creation. Save it securely.
             </AlertDescription>
           </Alert>
 
@@ -132,10 +133,10 @@ const CreateUserModal = ({ triggerElement }) => {
               </div>
             </div>
 
-            {/* Role Dropdown */}
+            {/* Role Dropdown - required */}
             <div className="space-y-1.5">
-              <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">User Role</Label>
-              <Select onValueChange={(val) => setFormData({...formData, role: val})}>
+              <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">User Role <span className="text-destructive">*</span></Label>
+              <Select required value={formData.role} onValueChange={(val) => setFormData({...formData, role: val})}>
                 <SelectTrigger className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 py-6">
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
@@ -173,9 +174,12 @@ const CreateUserModal = ({ triggerElement }) => {
               </div>
             </div>
 
-            <DialogFooter className="px-6 py-5 bg-slate-50 dark:bg-slate-900/50 border-t sm:justify-end gap-3">
-              <Button type="submit" form="create-user-form" disabled={isLoading} className="bg-primary">
-                {isLoading ? "Creating..." : "Create User"}
+        <DialogFooter className="px-6 py-4 border-t bg-muted/30 gap-2 sm:justify-end">
+              <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" form="create-user-form" disabled={isLoading}>
+                {isLoading ? "Creating…" : "Create User"}
               </Button>
             </DialogFooter>
           </form>

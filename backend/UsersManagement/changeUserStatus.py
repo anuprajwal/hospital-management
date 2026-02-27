@@ -26,7 +26,7 @@ def update_user_status(current_user_id, current_user_name, current_role):
         return jsonify({"error": "user_id and status are required"}), 400
 
 
-    allowed_status = {"Frozen", "Approved"}
+    allowed_status = {"Frozen", "Approve"}
 
     if new_status not in allowed_status:
         return jsonify({

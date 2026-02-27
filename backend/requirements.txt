@@ -129,8 +129,6 @@ monotonic==1.6
 mpmath==1.3.0
 multidict==6.1.0
 murmurhash==1.0.10
-mysql-connector-python==9.1.0
-mysqlclient==2.2.7
 netCDF4==1.7.2
 networkx==3.5
 nltk==3.8.1

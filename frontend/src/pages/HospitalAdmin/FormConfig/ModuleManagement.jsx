@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    Hospital, LayoutGrid, Users, Settings2, FileText, LogOut, 
-    Search, Bell, FlaskConical, Pill, BedDouble, CreditCard, 
-    Radiation, Plus, Loader2, AlertCircle, Edit2, Check, X 
+import {
+  FileText, FlaskConical, Pill, BedDouble, CreditCard,
+  Radiation, Loader2, Edit2, Check, Settings2
 } from 'lucide-react';
-import { fetchAvailableModules, updateModuleDescription, toggleModuleStatus } from './apis'; 
+import { fetchAvailableModules, updateModuleDescription, toggleModuleStatus } from './apis';
 
-// Shadcn UI Components
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import DynamicNavbar from "@/components/DynamicNavbar"
+import { cn } from "@/lib/utils";
+import DynamicNavbar from "@/components/DynamicNavbar";
+import TopHeader from "@/components/Top-Header";
 
 const ModuleManagement = () => {
   const [modules, setModules] = useState([]);
@@ -31,7 +28,7 @@ const ModuleManagement = () => {
       const data = await fetchAvailableModules();
       const moduleList = data.modules || [];
       setModules(moduleList);
-      
+
       const activeCount = moduleList.filter(m => m.is_active).length;
       setStats({ active: activeCount, inactive: moduleList.length - activeCount });
       setError(null);
@@ -48,184 +45,160 @@ const ModuleManagement = () => {
 
   const getModuleIcon = (name) => {
     const lowerName = name.toLowerCase();
-    if (lowerName.includes('op')) return <FileText className="text-primary" />;
-    if (lowerName.includes('lab')) return <FlaskConical className="text-primary" />;
-    if (lowerName.includes('pharmacy')) return <Pill className="text-primary" />;
-    if (lowerName.includes('ipd')) return <BedDouble className="text-primary" />;
-    if (lowerName.includes('billing')) return <CreditCard className="text-primary" />;
-    if (lowerName.includes('radio')) return <Radiation className="text-primary" />;
-    return <Settings2 className="text-primary" />;
+    if (lowerName.includes('op')) return <FileText className="text-primary" size={18} />;
+    if (lowerName.includes('lab')) return <FlaskConical className="text-primary" size={18} />;
+    if (lowerName.includes('pharmacy')) return <Pill className="text-primary" size={18} />;
+    if (lowerName.includes('ipd')) return <BedDouble className="text-primary" size={18} />;
+    if (lowerName.includes('billing')) return <CreditCard className="text-primary" size={18} />;
+    if (lowerName.includes('radio')) return <Radiation className="text-primary" size={18} />;
+    return <Settings2 className="text-primary" size={18} />;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 flex">
-      {/* Sidebar - Same as before */}
-      <DynamicNavbar/>
-
-      <main className="flex-1 ml-72">
-        <header className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-border px-8 py-6 sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <h2 className="text-2xl font-extrabold tracking-tight">System Modules Control</h2>
-            <div className="flex items-center gap-3">
-               <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                  <Input className="pl-10 w-64 bg-slate-100 dark:bg-slate-900 border-none" placeholder="Search modules..." />
-                </div>
-                <Button variant="outline" size="icon"><Bell size={18} /></Button>
-            </div>
-          </div>
-        </header>
-
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
-          {/* Status Bar */}
-          <Card className="shadow-sm border-primary/10">
-            <CardContent className="h-16 flex items-center justify-between px-8 py-0">
-              <div className="flex items-center gap-8">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground font-medium">Active:</span>
-                  <span className="text-lg font-bold text-primary">{loading ? "..." : stats.active}</span>
-                </div>
-                <Separator orientation="vertical" className="h-6" />
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground font-medium">Inactive:</span>
-                  <span className="text-lg font-bold text-slate-400">{loading ? "..." : stats.inactive}</span>
-                </div>
+    <div className="h-screen flex overflow-hidden bg-background text-foreground">
+      <div className="flex-shrink-0 h-full">
+        <DynamicNavbar />
+      </div>
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+        <TopHeader />
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 w-full max-w-[50vw]">
+            <div className="mb-6 flex items-baseline justify-between gap-4">
+              <div>
+                <h1 className="text-xl font-semibold text-foreground">System Modules</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Enable or disable modules for this hospital instance.
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              {!loading && (
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-primary">{stats.active}</span> active,{" "}
+                  <span className="font-medium text-muted-foreground">{stats.inactive}</span> inactive
+                </p>
+              )}
+            </div>
 
-          {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              Array.from({ length: 3 }).map((_, i) => <Card key={i} className="h-[250px] animate-pulse bg-muted" />)
-            ) : (
-              modules.map((module) => (
-                <ModuleCard 
-                  key={module.id}
-                  module={module}
-                  icon={getModuleIcon(module.module_name)}
-                />
-              ))
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
-          </section>
-        </div>
-      </main>
+
+            <Card>
+              <CardContent className="p-0">
+                <ul className="divide-y divide-border">
+                  {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <li key={i} className="flex items-center gap-4 px-6 py-3 animate-pulse">
+                        <div className="w-9 h-9 rounded-lg bg-muted/50" />
+                        <div className="flex-1 h-5 bg-muted/50 rounded w-32" />
+                        <div className="h-5 bg-muted/50 rounded w-16" />
+                      </li>
+                    ))
+                  ) : (
+                    modules.map((module) => (
+                      <ModuleListItem
+                        key={module.id}
+                        module={module}
+                        icon={getModuleIcon(module.module_name)}
+                      />
+                    ))
+                  )}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
 
-// --- Updated Stateful ModuleCard ---
-
-const ModuleCard = ({ module, icon }) => {
+const ModuleListItem = ({ module, icon }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(module.description || "");
   const [isUpdating, setIsUpdating] = useState(false);
   const [isActive, setIsActive] = useState(module.is_allowed);
 
   const handleSave = async () => {
-    // Prevent empty calls or redundant updates
-    if (description === module.description) {
+    if (description === (module.description || "")) {
       setIsEditing(false);
       return;
     }
-
     setIsUpdating(true);
     try {
-      // Use the imported API function
-      const responseData = await updateModuleDescription(module.id, description);
-      
+      await updateModuleDescription(module.id, description);
       setIsEditing(false);
-      
-      toast.success(responseData.message || "Module description updated successfully.");
-      
-      // Optional: If you want the parent to reflect the change without a refresh
-      // module.description = description; 
+      toast.success("Description updated.");
     } catch (err) {
-      toast.error(typeof err.message === 'object' ? "An error occurred" : err.message);
-
-      // Revert local state to the original description on failure
-      setDescription(module.description);
+      toast.error(typeof err.message === "object" ? "An error occurred" : err.message);
+      setDescription(module.description || "");
     } finally {
       setIsUpdating(false);
     }
   };
 
   const handleToggle = async (checked) => {
-    // Optimistically update the UI
     setIsActive(checked);
-    
     try {
-      const responseData = await toggleModuleStatus(module.id, checked);
-      toast.success(responseData.message || `${module.module_name} status updated.`);
-
+      await toggleModuleStatus(module.id, checked);
+      toast.success("Status updated.");
     } catch (err) {
-      // Revert UI state on failure
       setIsActive(!checked);
       toast.error(err.message);
     }
   };
 
   return (
-    <Card className={`transition-all flex flex-col justify-between min-h-[250px] ${!module.is_active && "opacity-75 grayscale-[0.3]"}`}>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${module.is_active ? "bg-primary/10" : "bg-muted"}`}>
-            {icon}
-          </div>
-          <div className="space-y-1">
-            <CardTitle className="text-lg">{module.module_name}</CardTitle>
-            <Badge variant={isActive ? "default" : "secondary"} className="text-[10px]">
-                {isActive ? "Active" : "Inactive"}
-            </Badge>
-          </div>
+    <li className="flex flex-col">
+      <div className="flex items-center gap-4 px-6 py-3 min-h-[52px] flex-wrap">
+        <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0", module.is_active ? "bg-primary/10" : "bg-muted")}>
+          {icon}
         </div>
-        {!isEditing && (
-          <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8 text-muted-foreground">
-            <Edit2 size={14} />
-          </Button>
-        )}
-      </CardHeader>
-
-      <CardContent className="flex-1 flex flex-col justify-between">
-        <div className="mt-2">
+        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+          <span className="font-medium text-foreground">{module.module_name}</span>
           {isEditing ? (
-            <div className="space-y-2">
-              <Textarea 
-                value={description} 
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:max-w-md">
+              <Textarea
+                value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="text-sm min-h-[80px] resize-none"
-                placeholder="Enter module description..."
+                className="text-sm min-h-[60px] sm:min-h-[36px] py-1.5 resize-none flex-1"
+                placeholder="Description..."
               />
-              <div className="flex gap-2">
-                <Button size="sm" onClick={handleSave} disabled={isUpdating} className="h-8 grow">
-                  {isUpdating ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} className="mr-1" />}
+              <div className="flex gap-2 flex-shrink-0">
+                <Button size="sm" variant="secondary" onClick={handleSave} disabled={isUpdating}>
+                  {isUpdating ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                   Save
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => { setIsEditing(false); setDescription(module.description); }} className="h-8">
-                  <X size={14} />
+                <Button size="sm" variant="outline" onClick={() => { setIsEditing(false); setDescription(module.description || ""); }}>
+                  Cancel
                 </Button>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
-              {description || "No description provided."}
-            </p>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-sm text-muted-foreground truncate">
+                {description || "No description"}
+              </span>
+              <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-7 w-7 flex-shrink-0 text-muted-foreground">
+                <Edit2 size={12} />
+              </Button>
+            </div>
           )}
         </div>
-
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/50">
-          <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
-            {module.updated_at || "Just now"}
-          </span>
-          <Switch 
-            checked={isActive} 
+        <div className="flex items-center gap-3 flex-shrink-0 ml-auto sm:ml-0">
+          <Badge variant={isActive ? "default" : "secondary"} className="text-xs">
+            {isActive ? "Active" : "Inactive"}
+          </Badge>
+          <Switch
+            checked={isActive}
             onCheckedChange={handleToggle}
-            disabled={isUpdating} 
+            disabled={isUpdating}
+            className="data-[state=checked]:bg-secondary"
           />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </li>
   );
 };
 
