@@ -30,6 +30,10 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { useNavigate } from 'react-router-dom';
+
+
+
 
 const AppointmentDashboard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -41,6 +45,15 @@ const AppointmentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+
+  const navigate = useNavigate();
+
+  
+
+  const handleOpenReception = (details) => {
+    console.log('redirecting...')
+    navigate('/detailed-reception', { state: { patientDetails: details } });
+  };
 
   // Fetch Form Structure and Patient List
   const loadInitialData = useCallback(async () => {
@@ -158,7 +171,7 @@ const AppointmentDashboard = () => {
                   {patients.map((pt) => {
                     const details = typeof pt.form_data === 'string' ? JSON.parse(pt.form_data) : pt.form_data;
                     return (
-                      <TableRow key={pt.id}>
+                      <TableRow onClick={() => handleOpenReception(pt)} key={pt.id}>
                         <TableCell className="font-semibold">
                           {pt?.patient_name || "N/A"} <br/>
                         </TableCell>

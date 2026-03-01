@@ -15,7 +15,7 @@ def validate_fields(fields):
     if not isinstance(fields, list) or len(fields) == 0:
         raise ValueError("fields must be a non-empty list")
 
-    required_keys = {"name", "type", "required", "locked"}
+    required_keys = {"name", "type", "required", "defaultValue"}
 
     for field in fields:
         if not required_keys.issubset(field.keys()):

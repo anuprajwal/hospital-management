@@ -1,256 +1,251 @@
-import React, {useState, useEffect} from 'react';
-import {
-    Plus,
-    CheckCircle2,
-    XCircle,
-    Trash2,
-    ChevronLeft,
-    ChevronRight, Info, Bolt, Database, Loader2
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+    Plus, CheckCircle2, XCircle, Trash2, Loader2, DatabaseZap, 
+    Search, Ghost, Edit2, Check, PlusCircle, Pencil 
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import TopHeader from "@/components/Top-Header"
+import TopHeader from "@/components/Top-Header";
 import FieldConfigPopup from "./AddFieldPopup";
 import { toast } from "sonner";
 import { useSearchParams } from 'react-router-dom';
 import { saveFormConfig, fetchAvailableForms } from './apis';
 
-
 const SYSTEM_FIELDS = [
-    { name: "id", type: "UUID", required: true, default: "auto-generated", locked: true, typeColor: "bg-indigo-100 text-indigo-700 border-indigo-200" },
-    { name: "created_at", type: "DateTime", required: true, default: "CURRENT_TIMESTAMP", locked: true, typeColor: "bg-blue-100 text-blue-700 border-blue-200" },
-];
-
-const infoCards = [
-    {
-        title: "System Fields",
-        description: "System fields (marked with 🔒) are mandatory for internal tracking and cannot be deleted or modified.",
-        icon: <Info className="w-5 h-5 text-primary" />,
-    },
-    {
-        title: "Validation",
-        description: "Changes to the schema will be applied to all active OP records upon clicking \"Publish\".",
-        icon: <Bolt className="w-5 h-5 text-emerald-500" />,
-    },
-    {
-        title: "Backups",
-        description: "A schema version snapshot is automatically created whenever you save or publish changes.",
-        icon: <Database className="w-5 h-5 text-amber-500" />,
-    },
+    { name: "id", type: "UUID", required: true, default: "auto-generated", locked: true, typeColor: "bg-indigo-100 text-indigo-700" },
+    { name: "created_at", type: "DateTime", required: true, default: "CURRENT_TIMESTAMP", locked: true, typeColor: "bg-blue-100 text-blue-700" },
 ];
 
 const ConfigHeader = () => {
     const [searchParams] = useSearchParams();
-
     const moduleId = searchParams.get('module_id');
+    const [formsList, setFormsList] = useState([]);
+    const [isFetching, setIsFetching] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
 
-    const [userFields, setUserFields] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const [isFetching, setIsFetching] = useState(true); // Loading state for initial fetch
-    const [existingForm, setExistingForm] = useState(null); // Stores existing form meta
-
-    useEffect(() => {
-        const saved = localStorage.getItem(`fields_${moduleId}`);
-        if (saved) setUserFields(JSON.parse(saved));
-    }, [moduleId]);
-
-
-    const handleAddField = (newField) => {
-        setUserFields([...userFields, { ...newField, locked: false }]);
-    };
-
-
-    const allFields = [...SYSTEM_FIELDS, ...userFields];
-
-    useEffect(() => {
-        const loadInitialData = async () => {
-            setIsFetching(true);
-            try {
-                const forms = await fetchAvailableForms(moduleId);
-
-                console.log(forms)
-                
-                // Assuming we check for a specific form name or just the first form for this module
-                const currentForm = forms.forms.find(f => f.module_id === moduleId);
-
-                if (currentForm && currentForm.fields) {
-                    setExistingForm(currentForm);
-                    // Filter out system fields so they don't duplicate in userFields state
-                    const customFields = currentForm.fields.filter(
-                        f => !SYSTEM_FIELDS.some(sf => sf.name === f.name)
-                    );
-                    setUserFields(customFields);
-                }
-            } catch (error) {
-                console.error("Failed to load existing schema:", error);
-                // Fallback to localStorage if API fails or is empty
-                const saved = localStorage.getItem(`fields_${moduleId}`);
-                if (saved) setUserFields(JSON.parse(saved));
-            } finally {
-                setIsFetching(false);
-            }
-        };
-
-        if (moduleId) loadInitialData();
-    }, [moduleId]);
-
-    // 2. Optimized Publish Logic
-    const handlePublish = async () => {
-        setIsLoading(true);
+    const loadInitialData = async () => {
+        setIsFetching(true);
         try {
-            const isUpdate = !!existingForm; // If we found a form earlier, it's a PUT
-            
-            const payload = {
-                form_name: existingForm?.form_name || "New Form", // Use existing name or default
-                module_id: moduleId,
-                fields: [...SYSTEM_FIELDS, ...userFields]
-            };
-
-            await saveFormConfig(payload, isUpdate);
-            
-            toast.success(isUpdate ? "Schema updated!" : "Schema published!");
-            
-            // Refresh local state to confirm update mode
-            if (!isUpdate) {
-                const updatedForms = await fetchAvailableForms(moduleId);
-                setExistingForm(updatedForms.find(f => f.module_id === moduleId));
-            }
+            const response = await fetchAvailableForms(moduleId);
+            const initializedForms = response.forms.map(form => ({
+                ...form,
+                currentFields: JSON.parse(form.form_fields || "[]"),
+                isEditingName: false 
+            }));
+            setFormsList(initializedForms);
         } catch (error) {
-            toast.error(error.message);
+            toast.error("Failed to load forms");
         } finally {
-            setIsLoading(false);
+            setIsFetching(false);
         }
     };
 
+    useEffect(() => {
+        if (moduleId) loadInitialData();
+    }, [moduleId]);
+
+    const handleAddNewForm = () => {
+        const trashString = Math.random().toString(36).substring(7);
+        const newForm = {
+            id: `temp-${Date.now()}`,
+            form_name: `New Form_${trashString}`,
+            currentFields: [],
+            is_allowed: true,
+            isEditingName: true,
+            isNew: true
+        };
+        setFormsList([newForm, ...formsList]);
+    };
+
+    const filteredForms = useMemo(() => {
+        return formsList.filter(form => 
+            form.form_name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm, formsList]);
+
+    if (isFetching) return (
+        <div className="h-screen flex items-center justify-center bg-slate-50">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        </div>
+    );
 
     return (
-        <div className="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen">
+        <div className="font-display bg-slate-50 dark:bg-background-dark text-slate-800 min-h-screen">
             <TopHeader />
-            <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-right">
-                    {/* Action Buttons Section */}
-                    <div className="flex items-center space-x-3">
-                        <FieldConfigPopup 
-                            onSave={handleAddField}
-                            triggerElement={
-                                <Button variant="outline"><Plus className="w-4 h-4 mr-2"/> Add Field</Button>
-                            }
-                        />                        <Button 
-                            onClick={handlePublish} 
-                            disabled={isLoading}
-                            className="bg-primary text-white"
-                        >
-                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Publish Schema"}
-                        </Button>
-                    </div>
-                </div>
-            </header>
-
-            <main className="max-w-[1440px] mx-auto px-6 py-8">
-
-                <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    {/* Title and Description */}
+            <main className="max-w-[1440px] mx-auto px-6 py-8 space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                            OP Module Schema
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                            <DatabaseZap className="text-primary" /> Module Schema Management
                         </h1>
-                        <p className="text-slate-500 text-sm mt-1">
-                            Configure database fields, data types, and validation rules for the Outpatient Module.
-                        </p>
                     </div>
 
+                    <div className="flex items-center gap-4">
+                        {formsList.length > 0 && (
+                            <div className="relative w-full md:w-80">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
+                                <Input 
+                                    placeholder="Search forms..." 
+                                    className="pl-10 h-11 bg-white rounded-xl shadow-sm border-2 focus:border-primary"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        )}
+                        {formsList.length > 0 && (
+                            <Button onClick={handleAddNewForm} className="h-11 gap-2 shadow-lg shadow-primary/20">
+                                <PlusCircle className="size-5" /> Create Form
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50/50">
-                                <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Field Name</TableHead>
-                                <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Data Type</TableHead>
-                                <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-center">Required</TableHead>
-                                <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Default Value</TableHead>
-                                <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {allFields.map((field, idx) => (
-                                <TableRow key={idx}>
-                                    <TableCell className="font-mono font-medium">{field.name}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline" className={field.typeColor}>{field.type}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {field.required ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-slate-300 mx-auto" />}
-                                    </TableCell>
-                                    <TableCell className="text-slate-500">{field.defaultValue || field.default || 'null'}</TableCell>
-                                    <TableCell className="text-right">
-                                        {!field.locked && (
-                                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => {
-                                                setUserFields(userFields.filter((_, i) => i !== (idx - SYSTEM_FIELDS.length)));
-                                            }}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-
-                    {/* Footer Section */}
-                    <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                        <p className="text-sm text-slate-500">
-                            Showing 6 fields. <span className="text-primary font-medium">2 system fields</span> and <span className="text-primary font-medium">4 user fields</span>.
-                        </p>
-                        <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" disabled className="h-8 w-8">
-                                <ChevronLeft className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" disabled className="h-8 w-8">
-                                <ChevronRight className="w-4 h-4" />
+                <div className="space-y-10">
+                    {filteredForms.length > 0 ? (
+                        filteredForms.map((form) => (
+                            <FormConfigSection 
+                                key={form.id} 
+                                form={form} 
+                                moduleId={moduleId}
+                                setFormsList={setFormsList}
+                            />
+                        ))
+                    ) : (
+                        <div className="p-20 flex flex-col items-center justify-center text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                            <Ghost className="size-16 text-slate-200 mb-6" />
+                            <h3 className="text-xl font-bold text-slate-900">There is no existing form</h3>
+                            <p className="text-slate-500 mt-2 mb-8 max-w-sm">
+                                No forms were found matching your criteria. Start by creating a new schema for this module.
+                            </p>
+                            <Button onClick={handleAddNewForm} size="lg" className="px-10 h-14 rounded-2xl font-black uppercase text-xs tracking-widest gap-2">
+                                <Plus className="size-5" /> Create Now
                             </Button>
                         </div>
-                    </div>
-                </div>
-
-
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {infoCards.map((card, index) => (
-                        <Card key={index} className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
-                            <CardHeader className="flex flex-row items-center space-y-0 gap-2 pb-3">
-                                {/* {card.icon} */}
-                                <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
-                                    {card.title}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-slate-500 leading-relaxed">
-                                    {card.description}
-                                </p>
-                            </CardContent>
-                        </Card>
-                    ))}
+                    )}
                 </div>
             </main>
-
-
-
         </div>
+    );
+};
+
+const FormConfigSection = ({ form, moduleId }) => {
+    const [userFields, setUserFields] = useState(form.currentFields);
+    const [isSaving, setIsSaving] = useState(false);
+    const [tempName, setTempName] = useState(form.form_name);
+
+    console.log("fields:", userFields)
+
+
+    // Update specific field in the list
+    const handleUpdateField = (updatedField, index) => {
+        const newFields = [...userFields];
+        newFields[index] = updatedField;
+        setUserFields(newFields);
+        toast.info("Field configuration updated");
+    };
+
+    const handlePublish = async () => {
+        setIsSaving(true);
+        try {
+            const payload = { form_name: form.form_name, module_id: moduleId, fields: userFields };
+            await saveFormConfig(payload, !form.isNew);
+            toast.success("Schema saved!");
+        } catch (error) { toast.error(error.message); }
+        finally { setIsSaving(false); }
+    };
+
+    const displayFields = [...SYSTEM_FIELDS, ...userFields];
+
+    return (
+        <Card className="border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+            <CardHeader className="bg-white border-b py-5 flex flex-row items-center justify-between">
+                <div className="flex items-center gap-4 flex-1">
+                    {form.isEditingName ? (
+                        <div className="flex items-center gap-2 flex-1 max-w-md">
+                            <Input 
+                                value={tempName} 
+                                onChange={(e) => setTempName(e.target.value)}
+                                className="h-10 font-bold text-lg border-primary focus:ring-primary"
+                                autoFocus
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            <CardTitle className="text-xl font-bold text-slate-900">{form.form_name}</CardTitle>
+                        </div>
+                    )}
+                </div>
+                <div className="flex gap-3">
+                    <FieldConfigPopup 
+                        onSave={(field) => setUserFields([...userFields, field])}
+                        triggerElement={<Button variant="outline" size="sm"><Plus className="w-4 mr-2"/> Add Field</Button>}
+                    />
+                    <Button size="sm" onClick={handlePublish} disabled={isSaving} className="bg-primary">
+                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Changes"}
+                    </Button>
+                </div>
+            </CardHeader>
+            <CardContent className="p-0">
+                <Table>
+                    <TableHeader><TableRow className="bg-slate-50/50">
+                        <TableHead className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Field Name</TableHead>
+                        <TableHead className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Type</TableHead>
+                        <TableHead className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 text-center">Required</TableHead>
+                        <TableHead className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 text-right">Actions</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                        {displayFields.map((field, idx) => (
+                            <TableRow key={idx} className="border-b last:border-0 group hover:bg-slate-50/30 transition-colors">
+                                <TableCell className="px-6 py-4 font-bold text-slate-700">{field.name}</TableCell>
+                                <TableCell className="px-6 py-4">
+                                    <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-tighter">
+                                        {field.type}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="text-center px-6 py-4">
+                                    {field.required ? (
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+                                    ) : (
+                                        <XCircle className="w-4 h-4 text-slate-300 mx-auto" />
+                                    )}
+                                </TableCell>
+                                <TableCell className="text-right px-6 py-4 space-x-1">
+                                    {!field.locked && (
+                                        <>
+                                            {/* Edit Field Button - Opens Popup with Prefilled Data */}
+                                            <FieldConfigPopup 
+                                                editData={field} // Prefill existing data
+                                                onSave={(updatedField) => handleUpdateField(updatedField, idx - SYSTEM_FIELDS.length)}
+                                                triggerElement={
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8 text-slate-400 hover:text-primary transition-opacity opacity-0 group-hover:opacity-100"
+                                                    >
+                                                        <Pencil className="size-4" />
+                                                    </Button>
+                                                }
+                                            />
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-8 w-8 text-red-400 hover:text-red-600 transition-opacity opacity-0 group-hover:opacity-100" 
+                                                onClick={() => setUserFields(userFields.filter((_, i) => i !== (idx - SYSTEM_FIELDS.length)))}
+                                            >
+                                                <Trash2 className="size-4" />
+                                            </Button>
+                                        </>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     );
 };
 

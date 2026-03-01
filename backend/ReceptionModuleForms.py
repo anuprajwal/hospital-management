@@ -19,17 +19,17 @@ doc_list = [row[0] for row in doc_rows] # Extract the first column (speciality)
 print(f"Specialities found: {doc_list}")
 
 form_structure = [
-    {"label": "Sur name", "type": "String", "required": True},
-    {"label": "patient name", "type": "String", "required": True},
-    {"label": "phone number", "type": "String", "required": False},
-    {"label": "age", "type": "Int", "required": True},
-    {"label": "gender", "type": "Dropdown", "options": ["Male", "Female", "Trans Gender"], "required": True},
-    {"label": "appointment type", "type": "Dropdown", "options": ["Consultation", "Diagnosis", "Operation"], "required": False},
-    {"label": "date", "type": "Date", "required": True},
-    {"label": "time", "type": "Time", "required": True},
-    {"label": "doctor", "type": "Dropdown", "options": doc_list, "required": False},
-    {"label": "clinical description", "type": "Text", "required": False},
-    {"label": "referer", "type": "Dropdown", "options": user_list, "required": False}
+    {"name": "Sur name", "type": "String", "required": True},
+    {"name": "patient name", "type": "String", "required": True},
+    {"name": "phone number", "type": "String", "required": False},
+    {"name": "age", "type": "Int", "required": True},
+    {"name": "gender", "type": "Dropdown", "options": ["Male", "Female", "Trans Gender"], "required": True},
+    {"name": "appointment type", "type": "Dropdown", "options": ["Consultation", "Diagnosis", "Operation"], "required": False},
+    {"name": "date", "type": "Date", "required": True},
+    {"name": "time", "type": "Time", "required": True},
+    {"name": "doctor", "type": "Dropdown", "options": doc_list, "required": False},
+    {"name": "clinical description", "type": "Text", "required": False},
+    {"name": "referer", "type": "Dropdown", "options": user_list, "required": False}
 ]
 
 # Convert the Python list to a JSON string for SQLite
