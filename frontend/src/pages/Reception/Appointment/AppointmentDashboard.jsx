@@ -61,7 +61,15 @@ import { cn } from "@/lib/utils";
 import AddAppointmentForm from "./AppointmentForm";
 import DynamicNavbar from "@/components/DynamicNavbar";
 import TopHeader from "@/components/Top-Header";
-import { fetchModulesByRole, getOutpatients, deleteOutpatient, moveToInpatient } from "./apis";
+import { fetchModulesByRole, getOutpatients, deleteOutpatient, moveToInpatient } from './apis';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { useNavigate } from 'react-router-dom';
 
 const statusBadgeVariant = (status) => {
   if (status === "Deleted") return "destructive";
@@ -86,6 +94,17 @@ const AppointmentDashboard = () => {
   const [detailsPatient, setDetailsPatient] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const navigate = useNavigate();
+
+  
+
+  const handleOpenReception = (details) => {
+    console.log('redirecting...')
+    navigate('/detailed-reception', { state: { patientDetails: details } });
+  };
+
+  // Fetch Form Structure and Patient List
 
   const loadInitialData = useCallback(async () => {
     setLoading(true);
@@ -235,16 +254,42 @@ const AppointmentDashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {loading ? (
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell><div className="h-5 w-32 bg-muted/50 rounded animate-pulse" /></TableCell>
-                        <TableCell><div className="h-5 w-24 bg-muted/50 rounded animate-pulse" /></TableCell>
-                        <TableCell><div className="h-5 w-20 bg-muted/50 rounded animate-pulse" /></TableCell>
-                        <TableCell><div className="h-5 w-28 bg-muted/50 rounded animate-pulse" /></TableCell>
-                        <TableCell><div className="h-5 w-28 bg-muted/50 rounded animate-pulse" /></TableCell>
-                        <TableCell><div className="h-5 w-16 bg-muted/50 rounded animate-pulse" /></TableCell>
-                        <TableCell />
+                  {patients.map((pt) => {
+                    const details = typeof pt.form_data === 'string' ? JSON.parse(pt.form_data) : pt.form_data;
+                    return (
+                      <TableRow onClick={() => handleOpenReception(pt)} key={pt.id}>
+                        <TableCell className="font-semibold">
+                          {pt?.patient_name || "N/A"} <br/>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {details['phone number'] || "N/A"} <br/>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {`${details?.age}/${details?.gender}`} <br/>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {details['doctor name'] || "N/A"} <br/>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {`${details?.date}, ${details?.time}`} <br/>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {pt?.status || "N/A"} <br/>
+                        </TableCell>
+
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button title="Move to IP" variant="ghost" size="icon" className="text-blue-500" onClick={() => handleMoveToIP(pt.id)}>
+                                <UserPlus className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="text-slate-400" onClick={() => openEditForm(pt)}>
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="text-red-400" onClick={() => handleDelete(pt.id)}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : error ? (

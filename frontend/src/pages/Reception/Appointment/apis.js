@@ -100,3 +100,18 @@ export const moveToInpatient = async (userId) => {
     if (!response.ok) throw new Error('Failed to transfer patient');
     return await response.json();
 };
+
+// 6. Get All Usernames and Roles
+export const getUsernames = async () => {
+    try {
+        const response = await fetch(`${BASE_URL}/users/get-usernames`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+        if (!response.ok) throw new Error('Failed to fetch users');
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch Users Error:", error);
+        throw error;
+    }
+};

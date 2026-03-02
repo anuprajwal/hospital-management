@@ -18,9 +18,9 @@ export const fetchAvailableModules = async () => {
     return await response.json();
 };
 
-export const saveFormConfig = async (formData, isUpdate = false) => {
-    const response = await fetch(`${BASE_URL}/module/form-edit`, {
-        method: isUpdate ? 'PUT' : 'POST',
+export const saveFormConfig = async (formData) => {
+    const response = await fetch(`${BASE_URL}/module/form-save`, {
+        method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify(formData),
     });

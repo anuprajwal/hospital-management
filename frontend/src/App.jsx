@@ -18,6 +18,7 @@ import LabTestPanel from "@/pages/Laboratory/TestsStackPage"
 import LabReportView from "@/pages/Laboratory/ReportsView"
 import LabTestEntry from "@/pages/Laboratory/EditReports"
 import TestResultsView from "@/pages/Doctor/ViewReports"
+import PatientOverview from "@/pages/Reception/Appointment/DetailedReception"
 
 function App() {
   return (
@@ -97,6 +98,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['Receptionist']}>
                 <AppointmentDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/detailed-reception" 
+            element={
+              <ProtectedRoute allowedRoles={['Receptionist']}>
+                <PatientOverview />
               </ProtectedRoute>
             } 
           />

@@ -69,3 +69,30 @@ def get_users(current_user_id, current_user_name, current_role):
 
     finally:
         conn.close()
+
+
+@user_management_bp.route('/get-usernames', methods=['GET'])
+@token_required
+def get_usernames(current_user_id, current_user_name, current_role):
+    conn = get_db_connection()
+
+    try:
+        cursor = conn.execute(
+            "SELECT id, user_name, role FROM users"
+        )
+
+        users = [
+            {
+                "id": row["id"],
+                "user_name": row["user_name"],
+                "role": row["role"]
+            }
+            for row in cursor.fetchall()
+        ]
+
+        return jsonify({
+            "users": users
+        }), 200
+
+    finally:
+        conn.close()
