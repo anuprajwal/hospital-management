@@ -51,7 +51,7 @@ function App() {
           <Route 
             path="/dashboard" 
             element={
-              <ProtectedRoute allowedRoles={['Admin']}>
+              <ProtectedRoute allowedRoles={['Admin', 'Lab_Incharge']}>
                 <HospitalModules />
               </ProtectedRoute>
             } 
@@ -172,16 +172,12 @@ function App() {
                 const userRole = localStorage.getItem('user_role');
 
                 if (userRole === "Super_Admin") {
-                  console.log('returning to module');
                   return <Navigate to="/module-management" replace />;
-                } else if (userRole === "Admin") {
-                  console.log("returning to dashboard");
+                } else if (userRole === "Admin" || userRole === "Lab_Incharge") {
                   return <Navigate to="/dashboard" replace />;
-                }else if (userRole === "Receptionist") {
-                  console.log("returning to appointment");
+                } else if (userRole === "Receptionist") {
                   return <Navigate to="/appointment-dashboard" replace />;
-                }else if (userRole === "Doctor") {
-                  console.log("returning to Doctor dashboard");
+                } else if (userRole === "Doctor") {
                   return <Navigate to="/doctor-appointments" replace />;
                 }else if (userRole === "Lab_Incharge") {
                   console.log("returning to Lab_Incharge dashboard");

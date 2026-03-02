@@ -99,10 +99,10 @@ export const createAccount = async (userData) => {
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                name: userData.username, // mapping 'username' from form to 'name' for API
+                name: (userData.username || "").trim(),
                 password: userData.password,
-                role: userData.role,
-                status: userData.allowActivity ? "Approve" : "Frozen"
+                role: (userData.role || "").trim(),
+                status: userData.allowActivity === false ? "Frozen" : "Approve"
             }),
         });
 

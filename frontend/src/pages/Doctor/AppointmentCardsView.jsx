@@ -1,39 +1,64 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  Filter, 
-  Clock, 
-  Phone, 
-  ArrowRight, 
+import {
+  Search,
+  Info,
+  MoreVertical,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ArrowRight,
 } from 'lucide-react';
 
-import { getOutpatients } from "@/pages/Reception/Appointment/apis"; 
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
+import { getOutpatients } from "@/pages/Reception/Appointment/apis";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 import DynamicNavbar from "@/components/DynamicNavbar";
 import TopHeader from "@/components/Top-Header";
 
-const StatusBadge = ({ status }) => {
-  const variants = {
+const statusBadgeClass = (status) => {
+  const map = {
     "In Consultation": "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 border-none",
     "Created": "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border-none",
     "Completed": "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 border-none",
   };
-  return <Badge className={`${variants[status] || "bg-slate-100"} uppercase text-[10px] font-bold`}>{status}</Badge>;
+  return map[status] || "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-none";
 };
 
 export default function DoctorPanel() {
@@ -44,6 +69,8 @@ export default function DoctorPanel() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [totalRecords, setTotalRecords] = useState(0);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsApt, setDetailsApt] = useState(null);
   const limit = 10;
 
   const fetchAppointments = async () => {
@@ -51,7 +78,7 @@ export default function DoctorPanel() {
     try {
       const statusParam = status === 'all' ? '' : status;
       const response = await getOutpatients(page, limit, search, statusParam);
-      
+
       const parsedData = (response.data || []).map(item => {
         const details = JSON.parse(item.form_data || "{}");
         return {
@@ -64,7 +91,7 @@ export default function DoctorPanel() {
           phone: details["phone number"] || 'N/A',
           notes: details["clinical description"] || 'No notes provided',
           fullDetails: details,
-          user_id: item.user_id
+          user_id: item.user_id,
         };
       });
 
@@ -78,156 +105,226 @@ export default function DoctorPanel() {
   };
 
   useEffect(() => {
-    fetchAppointments();
+    const t = setTimeout(() => fetchAppointments(), 300);
+    return () => clearTimeout(t);
   }, [page, search, status]);
 
   const totalPages = Math.ceil(totalRecords / limit);
+  const hasMore = (page - 1) * limit + appointments.length < totalRecords;
 
   const handleOpenAppointment = (apt) => {
     navigate('/detailed-appointment', { state: { patient: apt } });
   };
 
+  const openDetails = (apt) => {
+    setDetailsApt(apt);
+    setDetailsOpen(true);
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-slate-50 dark:bg-zinc-950">
-      {/* 1. Top Header: Full Width across the top */}
-      <div className="w-full flex-shrink-0 z-50 border-b">
-        <TopHeader />
+    <div className="h-screen flex overflow-hidden bg-background text-foreground">
+      <div className="flex-shrink-0 h-full">
+        <DynamicNavbar />
       </div>
-
-      {/* 2. Content Container: Below the header, split into Sidebar and Main */}
-      <div className="flex flex-1 overflow-hidden">
-        
-        {/* Sidebar: Fixed left, scrollable if needed */}
-        <aside className="w-64 h-full flex-shrink-0 border-r bg-white dark:bg-zinc-900 overflow-y-auto hidden lg:block">
-          <DynamicNavbar />
-        </aside>
-
-        {/* Body Content: Right side, scrollable */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-          <div className="max-w-[1400px] mx-auto">
-            
-            {/* Header & Filter Controls */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+        <TopHeader />
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="w-full">
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Appointments</h2>
-                <p className="text-muted-foreground text-sm font-medium mt-1 uppercase tracking-wider">
-                  Total Records Found: {totalRecords}
+                <h1 className="text-xl font-semibold text-foreground">Appointments</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  View and open patient consultations.
                 </p>
               </div>
+            </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative w-72">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Filter by patient name..." 
+            {/* Filters */}
+            <Card className="mb-4">
+              <CardContent className="p-3 flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder="Search by patient name..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-10 bg-white dark:bg-zinc-800 border-slate-200 h-11"
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="pl-9 h-9"
                   />
                 </div>
-
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-[180px] bg-white dark:bg-zinc-800 h-11 border-2 font-bold">
-                    <Filter className="mr-2 h-4 w-4 text-primary" />
-                    <SelectValue placeholder="All Status" />
+                <Select
+                  value={status}
+                  onValueChange={(val) => {
+                    setStatus(val);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full sm:w-44 h-9">
+                    <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="all">All statuses</SelectItem>
                     <SelectItem value="Created">Created</SelectItem>
                     <SelectItem value="In Consultation">In Consultation</SelectItem>
                     <SelectItem value="Completed">Completed</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* Appointment Grid */}
-            {loading ? (
-              <div className="flex flex-col items-center justify-center h-96 space-y-4">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-                <p className="font-bold text-muted-foreground animate-pulse">Synchronizing Patient Records...</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {appointments.map((apt) => (
-                  <Card key={apt.id} className="group transition-all hover:ring-2 hover:ring-primary/10 border-slate-200 dark:border-zinc-800 shadow-sm hover:shadow-md">
-                    <CardHeader className="flex flex-row justify-between items-start pb-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12 rounded-xl bg-primary/10">
-                          <AvatarFallback className="rounded-xl text-primary font-bold">
-                            {apt.patient_name[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-bold text-slate-800 dark:text-slate-100">{apt.patient_name}</h3>
-                          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-                            ID: #{apt.id} • {apt.age}Y / {apt.gender}
-                          </p>
-                        </div>
-                      </div>
-                      <StatusBadge status={apt.status} />
-                    </CardHeader>
-
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-primary" />
-                          <span className="font-bold">{apt.time}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Phone className="h-4 w-4 opacity-70" />
-                          <span className="font-medium">{apt.phone || "N/A"}</span>
-                        </div>
-                      </div>
-                      <div className="p-3 bg-slate-100/50 dark:bg-zinc-900 rounded-lg min-h-[60px] border border-transparent group-hover:border-slate-200 dark:group-hover:border-zinc-700 transition-colors">
-                        <p className="text-xs text-muted-foreground line-clamp-2 italic font-medium leading-relaxed">
-                          "{apt.notes}"
-                        </p>
-                      </div>
-                    </CardContent>
-
-                    <CardFooter className="pt-2">
-                      <Button 
-                        onClick={() => handleOpenAppointment(apt)}
-                        className="w-full font-black h-12 uppercase tracking-tight shadow-lg shadow-primary/10"
-                      >
-                        Open Appointment <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            )}
+            {/* Table */}
+            <Card>
+              <Table className="text-[15px]">
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-medium text-muted-foreground">Patient</TableHead>
+                    <TableHead className="font-medium text-muted-foreground">Phone</TableHead>
+                    <TableHead className="font-medium text-muted-foreground">Age / Gender</TableHead>
+                    <TableHead className="font-medium text-muted-foreground">Time</TableHead>
+                    <TableHead className="font-medium text-muted-foreground">Status</TableHead>
+                    <TableHead className="w-10" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><div className="h-5 w-32 bg-muted/50 rounded animate-pulse" /></TableCell>
+                        <TableCell><div className="h-5 w-28 bg-muted/50 rounded animate-pulse" /></TableCell>
+                        <TableCell><div className="h-5 w-24 bg-muted/50 rounded animate-pulse" /></TableCell>
+                        <TableCell><div className="h-5 w-20 bg-muted/50 rounded animate-pulse" /></TableCell>
+                        <TableCell><div className="h-5 w-24 bg-muted/50 rounded animate-pulse" /></TableCell>
+                        <TableCell />
+                      </TableRow>
+                    ))
+                  ) : (
+                    appointments.map((apt) => (
+                      <TableRow key={apt.id}>
+                        <TableCell>
+                          <div className="font-medium text-foreground">{apt.patient_name}</div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{apt.phone}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {apt.age} / {apt.gender}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{apt.time}</TableCell>
+                        <TableCell>
+                          <Badge className={`text-xs ${statusBadgeClass(apt.status)}`}>
+                            {apt.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="gap-1.5 h-8"
+                              onClick={() => handleOpenAppointment(apt)}
+                            >
+                              <ArrowRight className="w-4 h-4" />
+                              Open
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground"
+                              onClick={() => openDetails(apt)}
+                              aria-label="View details"
+                            >
+                              <Info className="w-4 h-4" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                                  <MoreVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleOpenAppointment(apt)}>
+                                  <ArrowRight className="w-4 h-4" />
+                                  Open appointment
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-12 pb-12 border-t pt-8">
-                <p className="text-sm font-bold text-muted-foreground">
-                  PAGE <span className="text-slate-900 dark:text-white px-2 py-1 bg-slate-200 dark:bg-zinc-800 rounded">{page}</span> OF {totalPages}
-                </p>
-                <div className="flex gap-4">
-                  <Button 
-                    variant="outline" 
-                    disabled={page === 1}
-                    onClick={() => setPage(p => p - 1)}
-                    className="h-11 px-6 font-bold border-2"
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-2" /> Previous
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    disabled={page === totalPages}
-                    onClick={() => setPage(p => p + 1)}
-                    className="h-11 px-6 font-bold border-2"
-                  >
-                    Next <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              </div>
-            )}
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">
+                Showing {appointments.length} of {totalRecords} appointments
+              </p>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={page <= 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
+                      <PaginationPrevious className="h-4 w-4" />
+                      Previous
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={!hasMore}
+                      onClick={() => setPage((p) => p + 1)}
+                    >
+                      Next
+                      <PaginationNext className="h-4 w-4" />
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         </main>
       </div>
+
+      {/* Details dialog */}
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Appointment details</DialogTitle>
+          </DialogHeader>
+          {detailsApt && (
+            <div className="space-y-3 text-sm">
+              <p><span className="font-medium text-muted-foreground">Patient:</span> {detailsApt.patient_name}</p>
+              <p><span className="font-medium text-muted-foreground">Phone:</span> {detailsApt.phone}</p>
+              <p><span className="font-medium text-muted-foreground">Age / Gender:</span> {detailsApt.age} / {detailsApt.gender}</p>
+              <p><span className="font-medium text-muted-foreground">Time:</span> {detailsApt.time}</p>
+              <p><span className="font-medium text-muted-foreground">Status:</span> {detailsApt.status}</p>
+              <p><span className="font-medium text-muted-foreground">Notes:</span> {detailsApt.notes}</p>
+              <div className="pt-2">
+                <Button
+                  variant="secondary"
+                  className="w-full gap-2"
+                  onClick={() => {
+                    setDetailsOpen(false);
+                    handleOpenAppointment(detailsApt);
+                  }}
+                >
+                  Open appointment
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

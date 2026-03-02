@@ -15,29 +15,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-const DeleteUserDialog = ({ triggerElement, onConfirm }) => {
+const DeleteUserDialog = ({ triggerElement, onConfirm, open, onOpenChange }) => {
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const isConfirmed = confirmText === "DELETE";
+  const isControlled = open !== undefined && onOpenChange != null;
+  const dialogOpen = isControlled ? open : internalOpen;
+  const setDialogOpen = (v) => {
+    if (!v) setConfirmText("");
+    if (isControlled) onOpenChange?.(v);
+    else setInternalOpen(v);
+  };
 
   const handleAction = async (e) => {
-    e.preventDefault(); // Prevent modal from closing immediately
+    e.preventDefault();
     setIsDeleting(true);
-    await onConfirm();
-    setIsDeleting(false);
-    setConfirmText("");
+    try {
+      await onConfirm();
+      setDialogOpen(false);
+    } finally {
+      setIsDeleting(false);
+      setConfirmText("");
+    }
   };
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        {triggerElement || (
-          <Button variant="destructive" size="icon">
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        )}
-      </AlertDialogTrigger>
-
+    <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {!isControlled && (
+        <AlertDialogTrigger asChild>
+          {triggerElement || (
+            <Button variant="outline" size="icon" className="border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive">
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent className="max-w-md p-0 overflow-hidden border-slate-200 dark:border-slate-800">
         {/* Warning Header Section */}
         <div className="p-6 pb-0 flex items-start gap-4">
@@ -82,12 +95,15 @@ const DeleteUserDialog = ({ triggerElement, onConfirm }) => {
         </div>
 
         {/* Modal Footer */}
-        <AlertDialogFooter className="bg-slate-50 dark:bg-slate-800/50 p-6 flex items-center justify-end gap-3">
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+        <AlertDialogFooter className="bg-muted/30 p-6 flex items-center justify-end gap-3">
+          <AlertDialogCancel asChild>
+            <Button variant="secondary" disabled={isDeleting}>Cancel</Button>
+          </AlertDialogCancel>
           <Button
+            variant="outline"
             disabled={!isConfirmed || isDeleting}
             onClick={handleAction}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold px-8"
+            className="border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive font-bold px-8"
           >
             {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             {isDeleting ? "Deleting..." : "Delete"}

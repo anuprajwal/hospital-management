@@ -18,6 +18,7 @@ const ChangeUserNamePopup = ({ open, onOpenChange, currentUsername }) => {
     setLoading(true);
     try {
       await updateUsername(newUsername);
+      localStorage.setItem('user_name', newUsername.trim());
       toast.success("Username updated successfully");
       onOpenChange(false);
     } catch (error) {
