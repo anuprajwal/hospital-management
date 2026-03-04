@@ -19,6 +19,10 @@ import LabReportView from "@/pages/Laboratory/ReportsView"
 import LabTestEntry from "@/pages/Laboratory/EditReports"
 import TestResultsView from "@/pages/Doctor/ViewReports"
 import PatientOverview from "@/pages/Reception/Appointment/DetailedReception"
+import EditMedicinePage from "@/pages/Pharmacy/AddMedicine"
+import PrescriptionQueue from "@/pages/Pharmacy/ViewPrescriptions"
+import PharmacyInventory from "@/pages/Pharmacy/ViewMedicine"
+import PharmacyDispensing from "@/pages/Pharmacy/MatchMedicines"
 
 function App() {
   return (
@@ -164,6 +168,42 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          
+          <Route 
+            path="/edit-medicine"
+            element={
+              <ProtectedRoute allowedRoles={['Pharmacist']}>
+                <EditMedicinePage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/search-medicine"
+            element={
+              <ProtectedRoute allowedRoles={['Pharmacist']}>
+                <PharmacyInventory />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/prescription-medicine"
+            element={
+              <ProtectedRoute allowedRoles={['Pharmacist']}>
+                <PrescriptionQueue />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/match-medicine"
+            element={
+              <ProtectedRoute allowedRoles={['Pharmacist']}>
+                <PharmacyDispensing />
+              </ProtectedRoute>
+            } 
+          />
           {/* Default Redirects */}
           <Route 
             path="*" 
@@ -186,6 +226,9 @@ function App() {
                 }else if (userRole === "Lab_Incharge") {
                   console.log("returning to Lab_Incharge dashboard");
                   return <Navigate to="/tests-dashboard" replace />;
+                }else if (userRole === "Pharmacist") {
+                  console.log("returning to Pharmacist dashboard");
+                  return <Navigate to="/search-medicine" replace />;
                 }
                 
                 // Fallback for other roles or unauthenticated users

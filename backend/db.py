@@ -27,7 +27,7 @@ def initialize_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_name TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            role TEXT NOT NULL CHECK(role IN ('Super_Admin', 'Receptionist', 'Lab_Incharge', 'Admin', 'Doctor')),
+            role TEXT NOT NULL CHECK(role IN ('Super_Admin', 'Receptionist', 'Lab_Incharge', 'Admin', 'Doctor', 'Pharmacist')),
             status TEXT NOT NULL CHECK(status IN ('Approve', 'Frozen')),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
@@ -153,6 +153,27 @@ def initialize_database():
         price REAL NOT NULL,
         description TEXT,
         parameters TEXT, 
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+    
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS available_drugs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        expiry_date DATE NOT NULL,
+        drug_form TEXT NOT NULL CHECK(
+            drug_form IN (
+                'Tablet', 'Capsule', 'Syringe', 'Syrup', 
+                'Ointment', 'Cream', 'Powder', 'Inhaler', 'Drops'
+            )
+        ),
+        manufacturer_name TEXT NOT NULL,
+        buying_price REAL NOT NULL,
+        selling_price REAL NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 0,
+        meta_data TEXT, -- Stores JSON string
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     """)

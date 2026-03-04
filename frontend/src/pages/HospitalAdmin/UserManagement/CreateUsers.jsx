@@ -140,9 +140,10 @@ const CreateUserModal = ({ triggerElement }) => {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Doctor">Doctor / Medical Staff</SelectItem>
+                  <SelectItem value="Doctor">Doctor</SelectItem>
                   <SelectItem value="Lab_Incharge">Lab Technician</SelectItem>
                   <SelectItem value="Receptionist">Receptionist</SelectItem>
+                  <SelectItem value="Pharmacist">Pharmacist</SelectItem>
                   <SelectItem value="Admin">Admin</SelectItem>
                 </SelectContent>
               </Select>

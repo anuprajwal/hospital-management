@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import DynamicNavbar from "@/components/DynamicNavbar";
+import TopHeader from "@/components/Top-Header";
 
 const queueData = [
   { id: 1, name: "Johnathan Doe", ptId: "#PT-8821", rxId: "#RX-5542", doctor: "Dr. Emily Smith", wait: "12 mins" },
@@ -31,41 +33,11 @@ const queueData = [
 
 export default function PrescriptionQueue() {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 font-sans">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-zinc-900 px-6 md:px-10 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="size-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-            <Pill className="size-5" />
-          </div>
-          <h2 className="text-xl font-black tracking-tighter uppercase">PharmacyPanel</h2>
-        </div>
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-zinc-950">
+      <TopHeader />
 
-        <div className="flex flex-1 justify-end gap-4 md:gap-8 items-center">
-          <div className="hidden md:flex relative w-64 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-            <Input 
-              placeholder="Search prescriptions..." 
-              className="pl-10 h-10 bg-slate-100 dark:bg-zinc-800 border-none rounded-xl focus-visible:ring-2"
-            />
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" size="icon" className="rounded-xl size-10">
-              <Bell className="size-5" />
-            </Button>
-            <Button variant="secondary" size="icon" className="rounded-xl size-10">
-              <Settings className="size-5" />
-            </Button>
-            <Separator orientation="vertical" className="h-6 mx-2 hidden md:block" />
-            <Avatar className="size-10 border-2 border-primary/20 shadow-sm">
-              <AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxCgJqYJrMFvuJHcR98ZQ3GTHU9_bOI6yZv_S8eKGtMwtsfX59ghw0OlHIq_Mh3YjPJZrgvqJZh7VVHd39VwcCQqHqzlc9GrYKASa-2AuiumGF8EUCRqNXn5DkoNYqNcPmAI_N8NqOagfOns8Wkt-G5q5kE6H5njQ9EXmvn4Uf44wX1Ig0iIWLmGk8exBXyZAN-fqjKBkeSUptDLc7kJ988sw3acpViNUjuUrboGt35n0ofD_mx-w9-anrtnMWlqkHrQTwzeqM-lI" />
-              <AvatarFallback>PH</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
-
+      <div className="flex flex-1">
+        <DynamicNavbar />
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-10 py-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
@@ -143,6 +115,7 @@ export default function PrescriptionQueue() {
           </div>
         </div>
       </footer>
+    </div>
     </div>
   );
 }

@@ -27,50 +27,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import DynamicNavbar from "@/components/DynamicNavbar";
+import TopHeader from "@/components/Top-Header";
 
 export default function PharmacyDispensing() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 font-sans">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        
-        {/* Top Navigation & Header */}
-        <header className="flex flex-col gap-6 mb-8">
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" className="text-primary font-bold gap-2 hover:bg-primary/5 p-0">
-              <ArrowLeft className="size-4" />
-              Back to Queue
-            </Button>
-            <div className="flex items-center gap-4">
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-black px-3 py-1 uppercase text-[10px] tracking-widest">
-                Waiting for Dispense
-              </Badge>
-              <Avatar className="h-10 w-10 border-2 border-slate-200 dark:border-zinc-800">
-                <AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9EOQk4dIMcdlOQO9aQVQpPXjTN3Mc5I0p5fMoXSCLFD49M1CCFZIhTZLH-PGmaTkiHjunEMGDnc8Bcq880F3uUeo0sHoltkjAXYVPWUN6IHrq_hygli65GfYp_n0p8qZ2x1KXrDLZghVAzMhlgYF9zvBDCi_6Nhz3xEvDL1IR6TiyM_Cy--9e4GiTB3_kuQFWs11ARG1eQ0iKIxLxOBFK53khPeVfFa5MkXOjhm3SCgkcViVZVKLOdos54oubI_Ca8rRY-wRShPs" />
-                <AvatarFallback>PH</AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-zinc-950">
+      <TopHeader />
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b">
-            <div>
-              <h1 className="text-4xl font-black tracking-tighter">Prescription PR-9034</h1>
-              <div className="flex items-center gap-4 mt-2 text-muted-foreground font-medium text-sm">
-                <span className="flex items-center gap-1.5"><User className="size-4 text-primary" /> John Doe</span>
-                <Separator orientation="vertical" className="h-4" />
-                <span>Patient ID: P-10293</span>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="outline" className="font-bold border-slate-300 dark:border-zinc-700 gap-2">
-                <PauseCircle className="size-4" /> Hold Order
-              </Button>
-              <Button className="font-black px-8 shadow-lg shadow-primary/20 gap-2">
-                <PackageCheck className="size-4" /> Process All
-              </Button>
-            </div>
-          </div>
-        </header>
-
+      <div className="flex flex-1">
+        <DynamicNavbar />
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Left Column: Prescription Overview */}

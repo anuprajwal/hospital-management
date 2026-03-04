@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import DynamicNavbar from "@/components/DynamicNavbar";
+import TopHeader from "@/components/Top-Header";
 
 const inventory = [
   {
@@ -57,34 +59,11 @@ const inventory = [
 
 export default function PharmacyInventory() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-100 font-sans pb-20">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary p-2 rounded-xl text-white shadow-lg shadow-primary/20">
-                <Pill className="size-5" />
-              </div>
-              <div>
-                <h1 className="text-xl font-black tracking-tight leading-none">Pharmacy Panel</h1>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Hospital System</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <Button className="hidden sm:flex rounded-xl font-bold gap-2">
-                <Plus className="size-4" /> Add Medicine
-              </Button>
-              <Avatar className="h-10 w-10 border-2 border-slate-200 dark:border-zinc-800">
-                <AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa2YleGqBtPTir8MgvX3sTgx5k_jSvEFaF8wUKhfeShU0wTMflCeCLzIVvG3cOp9_URn4TGK8Zw3RMzOxdXahyBaU2tK9-MNabwAa1YEA0l9niR36dvwdM4PGETYpV-nc3ivU2jlM2MerMw5YDKaDRrJZrBhM1lxDHwd7Sj_lU8GRAqtytifTsHodX-6tfCkIhYhyTWSJxfTknnsKQcCPitaHevG-r_ezXgyu20N737yWv9EMhmriyyL6_TizB1m6Dwouo5jT7yQo" />
-                <AvatarFallback>PH</AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-zinc-950">
+      <TopHeader />
+      
+      <div className="flex flex-1">
+        <DynamicNavbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
         <div className="mb-8">
@@ -126,28 +105,7 @@ export default function PharmacyInventory() {
         </div>
       </main>
 
-      {/* Footer Stats Overlay */}
-      <div className="fixed bottom-6 right-6 hidden lg:flex flex-col gap-4 z-50">
-        <StatsCard label="Inventory Value" value="$124,500.00" trend="+12%" />
-        <Card className="p-4 shadow-2xl border-slate-200 dark:border-zinc-800 w-72 rounded-2xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Low Stock Alerts</span>
-            <Badge className="bg-destructive text-white font-black rounded-sm h-5 px-1.5">8</Badge>
-          </div>
-          <div className="flex -space-x-3">
-            {[1, 2].map((i) => (
-              <Avatar key={i} className="size-10 border-4 border-white dark:border-zinc-900 shadow-sm">
-                <AvatarFallback className="bg-red-100 text-red-500">
-                  <AlertTriangle className="size-4" />
-                </AvatarFallback>
-              </Avatar>
-            ))}
-            <div className="size-10 rounded-full border-4 border-white dark:border-zinc-900 bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-black text-slate-500 shadow-sm">
-              +6
-            </div>
-          </div>
-        </Card>
-      </div>
+    </div>
     </div>
   );
 }

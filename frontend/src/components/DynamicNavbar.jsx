@@ -3,6 +3,7 @@ import SuperAdminSidebar from "./SuperAdminNavbar";
 import AdminSidebar from "./AdminNavbar";
 import ReceptionistSidebar from "./ReceptionistNavbar"
 import LabInchargeSidebar from './LabInchargeSidebar';
+import PharmacySidebar from "./PharmacySidebar"
 
 const DynamicNavbar = () => {
   const role = localStorage.getItem('user_role');
@@ -18,6 +19,8 @@ const DynamicNavbar = () => {
       return <ReceptionistSidebar/>
     case 'Lab_Incharge':
       return <LabInchargeSidebar/>
+    case 'Pharmacist':
+      return <PharmacySidebar/>
     default:
       return <Sidebar />;
   }
