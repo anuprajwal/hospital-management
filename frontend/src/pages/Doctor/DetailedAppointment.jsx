@@ -159,20 +159,7 @@ const PatientDetailView = () => {
   };
 
   return (
-<<<<<<< Updated upstream
-    <div className="flex flex-col h-screen bg-slate-50 dark:bg-zinc-950 font-sans">
-      <TopHeader />
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-64 flex-shrink-0 border-r bg-white dark:bg-zinc-900 overflow-y-auto hidden lg:block">
-          <DynamicNavbar />
-        </aside>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-10">
-          <div className="max-w-[1400px] mx-auto space-y-10 pb-20">
-
-            {/* Consultation Header */}
-            <div className="flex justify-between items-center border-b pb-6">
-=======
     <div className="h-screen flex overflow-hidden bg-background text-foreground">
       {/* Sidenav */}
       <div className="flex-shrink-0 h-full" aria-label="Sidebar">
@@ -185,7 +172,6 @@ const PatientDetailView = () => {
           <div className="w-full space-y-0 pb-6">
             {/* Title bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-border">
->>>>>>> Stashed changes
               <div>
                 <h1 className="text-base font-semibold text-foreground">Consultation</h1>
                 <p className="text-xs text-muted-foreground">Visit ID: #{patient.id}</p>
@@ -195,22 +181,7 @@ const PatientDetailView = () => {
               </Badge>
             </div>
 
-<<<<<<< Updated upstream
-            {/* Profile Section */}
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="bg-slate-50/50 border-b py-3 px-6">
-                <CardTitle className="text-xs font-black flex items-center gap-2 uppercase tracking-tighter">
-                  <PersonStanding className="h-4 w-4 text-primary" /> Demographics
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6 grid grid-cols-2 md:grid-cols-4 gap-6">
-                <InfoItem label="Full Name" value={patient.patient_name} />
-                <InfoItem label="Age / Gender" value={`${patient.age}Y / ${patient.gender}`} />
-                <InfoItem label="Contact" value={patient.phone} icon={<Phone className="size-3" />} />
-                <InfoItem label="Schedule" value={patient.time} icon={<Clock className="size-3" />} />
-              </CardContent>
-            </Card>
-=======
+
             {/* Patient details + Observations — one block */}
             <div className="py-3 border-b border-border">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
@@ -228,7 +199,6 @@ const PatientDetailView = () => {
                 />
               </div>
             </div>
->>>>>>> Stashed changes
 
             {/* Prescription — full-width table */}
             <div className="py-3 border-b border-border">
@@ -258,18 +228,7 @@ const PatientDetailView = () => {
                   </TableHeader>
                   <TableBody>
                     {medicines.map((med, idx) => (
-<<<<<<< Updated upstream
-                      <TableRow key={med.id}>
-                        <TableCell>
-                          <Input
-                            value={med.name}
-                            onChange={(e) => {
-                              const newMeds = [...medicines];
-                              newMeds[idx].name = e.target.value;
-                              setMedicines(newMeds);
-                            }}
-                            className="border-none bg-transparent font-bold"
-=======
+
                       <TableRow key={med.id} className="border-b border-border last:border-0">
                         <TableCell className="py-1 px-3">
                           <Input
@@ -281,7 +240,6 @@ const PatientDetailView = () => {
                             }}
                             placeholder="Name"
                             className="h-7 border-border text-sm"
->>>>>>> Stashed changes
                           />
                         </TableCell>
                         <TableCell className="py-1 px-3">
@@ -316,12 +274,7 @@ const PatientDetailView = () => {
                             </SelectContent>
                           </Select>
                         </TableCell>
-<<<<<<< Updated upstream
-                        <TableCell><Input placeholder="7 days" className="border-none bg-transparent w-20 font-medium" /></TableCell>
-                        <TableCell className="text-center">
-                          <Button variant="ghost" size="icon" onClick={() => setMedicines(medicines.filter(m => m.id !== med.id))}>
-                            <Trash2 size={16} className="text-red-400 hover:text-red-600" />
-=======
+
                         <TableCell className="py-1 px-3">
                           <Input
                             placeholder="e.g. 7 days"
@@ -344,7 +297,6 @@ const PatientDetailView = () => {
                             aria-label="Remove row"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
->>>>>>> Stashed changes
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -361,17 +313,10 @@ const PatientDetailView = () => {
                 <div className="lg:col-span-5 border border-border rounded-md overflow-hidden">
                   <div className="px-3 py-2 border-b border-border bg-muted/30">
                     <div className="relative">
-<<<<<<< Updated upstream
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Filter tests..."
-                        className="pl-9 h-11 border-2 font-bold"
-=======
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                       <Input
                         placeholder="Search tests…"
                         className="pl-8 h-8 text-sm border-border"
->>>>>>> Stashed changes
                         value={testSearch}
                         onChange={(e) => {
                           setTestSearch(e.target.value);
@@ -379,94 +324,6 @@ const PatientDetailView = () => {
                         }}
                       />
                     </div>
-<<<<<<< Updated upstream
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <ScrollArea className="h-[300px]">
-                      {testLoading ? (
-                        <div className="flex justify-center p-10"><Loader2 className="animate-spin text-primary" /></div>
-                      ) : (
-                        availableTests.map((test) => (
-                          <div
-                            key={test.id}
-                            className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-b cursor-pointer"
-                            onClick={() => toggleTestSelection(test)}
-                          >
-                            <Checkbox checked={!!selectedTests.find(t => t.name === test.name)} onCheckedChange={() => toggleTestSelection(test)} />
-                            <div className="flex-grow">
-                              <p className="text-sm font-black text-slate-700">{test.name}</p>
-                              <p className="text-[10px] font-bold text-muted-foreground">Price: ₹{test.price}</p>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-
-                <Card className="lg:col-span-7 border-slate-200 bg-white">
-                  <CardHeader className="py-3 px-4 border-b">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Queued Orders ({selectedTests.length})</CardTitle>
-                    {selectedTests.length > 0 && (
-      <Button 
-        size="sm" 
-        variant="outline"
-        onClick={() => navigate('/test-results-view', { state: { allTests: selectedTests } })}
-        className="h-7 px-3 font-black text-[9px] uppercase border-primary text-primary hover:bg-primary/5"
-      >
-        View Full Report
-      </Button>
-    )}
-                  </CardHeader>
-                  <ScrollArea className="h-[360px] p-4">
-                    {selectedTests.length > 0 ? (
-                      <div className="space-y-2">
-                        {selectedTests.map((test) => (
-                          <div key={test.id} className="flex items-center gap-4 p-3 bg-slate-50 border rounded-lg border-primary/10">
-                            <div className="size-8 bg-white rounded flex items-center justify-center text-primary shadow-sm">
-                              <Activity size={16} />
-                            </div>
-
-                            <div className="flex-grow flex flex-col gap-1">
-                              <div className="font-black text-xs uppercase tracking-tight">
-                                {test.name}
-                              </div>
-                              {/* Show status string directly under or next to the name */}
-                              {test.status && (
-                                <div className="flex items-center gap-2">
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-[8px] px-1.5 py-0 font-bold uppercase bg-slate-200/50 text-slate-600 border-none"
-                                  >
-                                    {test.status}
-                                  </Badge>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              {test.isExisting && (
-                                <Badge variant="outline" className="text-[9px] font-bold text-emerald-600 border-emerald-200">
-                                  Existing
-                                </Badge>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => toggleTestSelection(test)}
-                                className="h-8 w-8"
-                              >
-                                <X size={14} className="text-red-400" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-muted-foreground text-[10px] uppercase font-bold italic">
-                        No active test orders
-                      </div>
-=======
                   </div>
                   <ScrollArea className="h-[200px]">
                     {testLoading ? (
@@ -493,7 +350,6 @@ const PatientDetailView = () => {
                           </li>
                         ))}
                       </ul>
->>>>>>> Stashed changes
                     )}
                   </ScrollArea>
                 </div>
@@ -542,12 +398,6 @@ const PatientDetailView = () => {
             </div>
 
             {/* Actions */}
-<<<<<<< Updated upstream
-            <div className="pt-10 border-t flex items-center justify-between">
-              <Button variant="outline" className="px-12 h-12 font-black uppercase text-xs tracking-widest border-2" onClick={() => navigate(-1)}>Discard</Button>
-              <Button
-                onClick={handleCompleteConsultation}
-=======
             <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2 pt-4">
               <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="w-full sm:w-auto h-8">
                 Back
@@ -555,7 +405,6 @@ const PatientDetailView = () => {
               <Button
                 variant="secondary"
                 size="sm"
->>>>>>> Stashed changes
                 disabled={isSubmitting}
                 onClick={handleCompleteConsultation}
                 className="gap-1.5 w-full sm:w-auto h-8"

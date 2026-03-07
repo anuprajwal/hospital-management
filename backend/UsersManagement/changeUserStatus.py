@@ -1,6 +1,5 @@
 from flask import jsonify, request
 from backend.db import get_db_connection
-import sqlite3
 from backend.middleware.verifyToken import token_required
 from backend.UsersManagement.usersBlueprint import user_management_bp
 

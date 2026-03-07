@@ -223,7 +223,7 @@ function App() {
 
                 if (userRole === "Super_Admin") {
                   return <Navigate to="/module-management" replace />;
-                } else if (userRole === "Admin" || userRole === "Lab_Incharge") {
+                } else if (userRole === "Admin") {
                   return <Navigate to="/dashboard" replace />;
                 } else if (userRole === "Receptionist") {
                   return <Navigate to="/appointment-dashboard" replace />;

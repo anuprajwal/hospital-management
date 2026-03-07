@@ -24,7 +24,7 @@ const PricingManagement = () => {
     setLoading(true);
     try {
       const res = await getPrices(filters.page, limit, filters.name, filters.status);
-      setServices(res || []);
+      setServices(res.data || []);
       setTotalRecords(res.total_records || 0);
     } catch (err) { 
       console.error("Fetch Error:", err); 

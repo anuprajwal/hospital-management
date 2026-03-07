@@ -62,13 +62,6 @@ import AddAppointmentForm from "./AppointmentForm";
 import DynamicNavbar from "@/components/DynamicNavbar";
 import TopHeader from "@/components/Top-Header";
 import { fetchModulesByRole, getOutpatients, deleteOutpatient, moveToInpatient } from './apis';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { useNavigate } from 'react-router-dom';
 
 const statusBadgeVariant = (status) => {
@@ -97,7 +90,7 @@ const AppointmentDashboard = () => {
 
   const navigate = useNavigate();
 
-  
+
 
   const handleOpenReception = (details) => {
     console.log('redirecting...')
@@ -254,115 +247,86 @@ const AppointmentDashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {patients.map((pt) => {
-                    const details = typeof pt.form_data === 'string' ? JSON.parse(pt.form_data) : pt.form_data;
-                    return (
-                      <TableRow onClick={() => handleOpenReception(pt)} key={pt.id}>
-                        <TableCell className="font-semibold">
-                          {pt?.patient_name || "N/A"} <br/>
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          {details['phone number'] || "N/A"} <br/>
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          {`${details?.age}/${details?.gender}`} <br/>
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          {details['doctor name'] || "N/A"} <br/>
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          {`${details?.date}, ${details?.time}`} <br/>
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          {pt?.status || "N/A"} <br/>
-                        </TableCell>
-
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button title="Move to IP" variant="ghost" size="icon" className="text-blue-500" onClick={() => handleMoveToIP(pt.id)}>
-                                <UserPlus className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="text-slate-400" onClick={() => openEditForm(pt)}>
-                                <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="text-red-400" onClick={() => handleDelete(pt.id)}>
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : error ? (
+                  {error ? (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center text-destructive py-8">
                         {error}
                       </TableCell>
                     </TableRow>
+                  ) : patients.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                        No appointments found
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     patients.map((pt) => {
-                      const details = typeof pt.form_data === "string" ? JSON.parse(pt.form_data || "{}") : pt.form_data || {};
+                      const details =
+                        typeof pt.form_data === "string"
+                          ? JSON.parse(pt.form_data || "{}")
+                          : pt.form_data || {};
+
                       return (
-                        <TableRow key={pt.id}>
-                          <TableCell>
-                            <div className="font-medium text-foreground">
-                              {pt?.patient_name || "N/A"}
-                            </div>
+                        <TableRow onClick={() => handleOpenReception(pt)} key={pt.id}>
+                          <TableCell className="font-semibold">
+                            {pt?.patient_name || "N/A"}
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {details["phone number"] ?? "—"}
+
+                          <TableCell className="font-semibold">
+                            {details["phone number"] || "N/A"}
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {details?.age && details?.gender ? `${details.age} / ${details.gender}` : "—"}
+
+                          <TableCell className="font-semibold">
+                            {details?.age && details?.gender
+                              ? `${details.age}/${details.gender}`
+                              : "N/A"}
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {details["doctor"] ?? "—"}
+
+                          <TableCell className="font-semibold">
+                            {details["doctor name"] || "N/A"}
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {details?.date && details?.time ? `${details.date}, ${details.time}` : "—"}
+
+                          <TableCell className="font-semibold">
+                            {details?.date && details?.time
+                              ? `${details.date}, ${details.time}`
+                              : "N/A"}
                           </TableCell>
+
                           <TableCell>
                             <Badge variant={statusBadgeVariant(pt?.status)} className="text-xs">
                               {pt?.status || "N/A"}
                             </Badge>
                           </TableCell>
+
                           <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                title="Move to IP"
+                                variant="ghost"
+                                size="icon"
+                                className="text-blue-500"
+                                onClick={() => handleMoveToIP(pt.id)}
+                              >
+                                <UserPlus className="h-4 w-4" />
+                              </Button>
+
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-muted-foreground"
-                                onClick={() => openDetails(pt)}
-                                aria-label="View details"
+                                className="text-slate-400"
+                                onClick={() => openEditForm(pt)}
                               >
-                                <Info className="w-4 h-4" />
+                                <Edit className="h-4 w-4" />
                               </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleMoveToIP(pt.user_id ?? pt.id)}>
-                                    <UserPlus className="w-4 h-4" />
-                                    Move to In-Patient
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => openEditForm(pt)}>
-                                    <Edit className="w-4 h-4" />
-                                    Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive"
-                                    onSelect={(e) => {
-                                      e.preventDefault();
-                                      openDeleteDialog(pt.id);
-                                    }}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-red-400"
+                                onClick={() => handleDelete(pt.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>

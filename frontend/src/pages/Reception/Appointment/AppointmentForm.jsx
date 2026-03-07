@@ -21,7 +21,7 @@ const AddAppointmentForm = ({ open, onOpenChange, dynamicFields = [], formTitle,
     } else {
       // If creating new
       const initialState = {};
-      dynamicFields.forEach(field => { initialState[field.label] = ""; });
+      dynamicFields.forEach(field => { initialState[field.name] = ""; });
       setFormState(initialState);
     }
     setError(null);
@@ -32,7 +32,7 @@ const AddAppointmentForm = ({ open, onOpenChange, dynamicFields = [], formTitle,
       const fetchUsers = async () => {
         try {
           const data = await getUsernames();
-          setUsers(data || []);
+          setUsers(data.users || []);
         } catch (err) {
           console.error("Failed to load users for dropdowns", err);
         }
@@ -65,15 +65,15 @@ const AddAppointmentForm = ({ open, onOpenChange, dynamicFields = [], formTitle,
   };
 
   const processedFields = dynamicFields.map(field => {
-    const labelLower = field.label.toLowerCase();
+    const labelLower = field.name.toLowerCase();
 
     // 1. Filter Doctors: role === 'Doctor'
-    if (labelLower === "doctor name" || labelLower === "speciality") {
+    if (labelLower === "doctor") {
       const doctors = users.filter(u => u.role === "Doctor");
       return {
         ...field,
-        type: "select", // Ensure it renders as a dropdown
-        options: doctors.map(d => ({ label: d.username, value: d.username })) 
+        type: "Dropdown", // Ensure it renders as a dropdown
+        options: doctors.map(d => ({ label: d.user_name, value: d.id })) 
       };
     }
 
@@ -81,8 +81,31 @@ const AddAppointmentForm = ({ open, onOpenChange, dynamicFields = [], formTitle,
     if (labelLower === "referer") {
       return {
         ...field,
-        type: "select",
-        options: users.map(u => ({ label: u.username, value: u.username }))
+        type: "Dropdown",
+        options: users.map(u => ({ label: u.user_name, value: u.id }))
+      };
+    }
+
+    if (field.type === "Dropdown") {
+      const normalizedOptions = (field.options || []).map((opt) => {
+        // If already object
+        if (typeof opt === "object" && opt !== null) {
+          return {
+            label: opt.label ?? opt.value,
+            value: opt.value ?? opt.label
+          };
+        }
+  
+        // If string/number
+        return {
+          label: opt,
+          value: opt
+        };
+      });
+  
+      return {
+        ...field,
+        options: normalizedOptions
       };
     }
 
@@ -110,7 +133,7 @@ const AddAppointmentForm = ({ open, onOpenChange, dynamicFields = [], formTitle,
                 <DynamicFieldRenderer 
                   key={index}
                   field={field}
-                  value={formState[field.label] || ""}
+                  value={formState[field.name] || ""}
                   onChange={handleInputChange}
                 />
               ))}

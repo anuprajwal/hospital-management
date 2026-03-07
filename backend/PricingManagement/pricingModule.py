@@ -158,21 +158,26 @@ def get_tests(current_user_id, current_user_name, current_user_role):
         params.append(category)
 
     if status is not None:
-
         status_str = str(status).strip().lower()
 
-        if status_str in ["1", "true"]:
-            status_value = 1
+        # If "all", do not apply any status filter
+        if status_str == "all":
+            pass
+
+        elif status_str in ["1", "true"]:
+            query += " AND status = ?"
+            count_query += " AND status = ?"
+            params.append(1)
+
         elif status_str in ["0", "false"]:
-            status_value = 0
+            query += " AND status = ?"
+            count_query += " AND status = ?"
+            params.append(0)
+
         else:
             return jsonify({
-                "error": "Invalid status filter. Use 0, 1, true, or false."
+                "error": "Invalid status filter. Use 0, 1, true, false, or all."
             }), 400
-
-        query += " AND status = ?"
-        count_query += " AND status = ?"
-        params.append(status_value)
 
     if min_price:
         try:
