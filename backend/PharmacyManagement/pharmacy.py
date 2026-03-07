@@ -115,3 +115,84 @@ def delete_drug(current_user_id, current_user_name, current_role, drug_id):
         return jsonify({"message": "Drug deleted successfully"}), 200
     finally:
         conn.close()
+
+
+@pharmacy_management_bp.route('/prescriptions', methods=['GET'])
+@token_required
+def get_prescriptions(current_user_id, current_user_name, current_role):
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+
+        patient_name = request.args.get('patient_name')
+        page = request.args.get('page', default=1, type=int)
+        limit = request.args.get('limit', default=10, type=int)
+
+        if page < 1:
+            page = 1
+        if limit < 1:
+            limit = 10
+
+        offset = (page - 1) * limit
+
+        query = """
+        SELECT 
+            prescriptions.*,
+            outPatient.patient_name
+        FROM prescriptions
+        JOIN outPatient
+            ON prescriptions.patient_id = outPatient.id
+        """
+
+        filters = []
+        params = []
+
+        # patient name filter
+        if patient_name:
+            filters.append("outPatient.patient_name LIKE ?")
+            params.append(f"%{patient_name}%")
+
+        if filters:
+            query += " WHERE " + " AND ".join(filters)
+
+        query += """
+        ORDER BY prescriptions.created_on DESC
+        LIMIT ? OFFSET ?
+        """
+
+        params.extend([limit, offset])
+
+        cursor.execute(query, params)
+
+        rows = cursor.fetchall()
+
+        # convert sqlite Row → dict
+        data = [dict(row) for row in rows]
+
+        # total count
+        count_query = """
+        SELECT COUNT(*)
+        FROM prescriptions
+        JOIN outPatient
+            ON prescriptions.patient_id = outPatient.id
+        """
+
+        if filters:
+            count_query += " WHERE " + " AND ".join(filters)
+
+        cursor.execute(count_query, params[:-2] if filters else [])
+        total = cursor.fetchone()[0]
+
+        return jsonify({
+            "data": data,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total_records": total,
+                "total_pages": (total + limit - 1) // limit
+            }
+        }), 200
+
+    finally:
+        conn.close()

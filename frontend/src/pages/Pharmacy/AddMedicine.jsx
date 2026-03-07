@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Info, 
   Package, 
@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 // Import the service function
-import { addDrug } from './apis';
+import { addDrug, updateDrug } from './apis';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,12 @@ import {
 } from "@/components/ui/select";
 import DynamicNavbar from "@/components/DynamicNavbar";
 import TopHeader from "@/components/Top-Header";
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function EditMedicinePage() {
-  // 1. Initialize state for form data
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editData = location.state?.editData;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -35,6 +38,26 @@ export default function EditMedicinePage() {
     quantity: '',
     batch_number: '', // For meta_data
   });
+
+  // useEffect(() => {
+  //   if (editData) {
+  //     setFormData({
+  //       ...editData,
+  //       // Map any specific fields if API names differ from form names
+  //       batch_number: editData.batch || editData.batch_number,
+  //     });
+  //   }
+  // }, [editData]);
+
+  useEffect(() => {
+    if (editData) {
+      setFormData({
+        ...editData,
+        // Safely check for the nested meta_data object from the API response
+        batch_number: editData.meta_data?.batch_number || editData.batch || '',
+      });
+    }
+  }, [editData]);
 
   // 2. Handle input changes
   const handleChange = (e) => {
@@ -50,7 +73,6 @@ export default function EditMedicinePage() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Map frontend state to the specific API structure provided
       const apiPayload = {
         name: formData.name,
         expiry_date: formData.expiry_date,
@@ -59,18 +81,18 @@ export default function EditMedicinePage() {
         buying_price: parseFloat(formData.buying_price),
         selling_price: parseFloat(formData.selling_price),
         quantity: parseInt(formData.quantity),
-        meta_data: {
-          category: formData.category,
-          batch_number: formData.batch_number,
-          low_stock_threshold: formData.low_stock_threshold
-        }
+        meta_data: { batch_number: formData.batch_number }
       };
 
-      await addDrug(apiPayload);
-      alert("Medicine added successfully!");
-      // Optional: Redirect or clear form here
+      if (editData?.id) {
+        await updateDrug(editData.id, apiPayload);
+        alert("Medicine updated successfully!");
+      } else {
+        await addDrug(apiPayload);
+        alert("Medicine added successfully!");
+      }
+      navigate('/view-medicine'); // Return to list after save
     } catch (error) {
-      console.error("Failed to add drug:", error);
       alert("Error: " + error.message);
     } finally {
       setLoading(false);
@@ -196,7 +218,7 @@ export default function EditMedicinePage() {
                   className="min-w-[180px] h-12 rounded-xl font-black text-base gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95"
                 >
                   <Save size={20} />
-                  {loading ? "Saving..." : "Save Medicine"}
+                  {loading ? "Processing..." : editData ? "Update Medicine" : "Save Medicine"}
                 </Button>
               </div>
             </div>

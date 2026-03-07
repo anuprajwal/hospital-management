@@ -1,243 +1,558 @@
-import React from 'react';
-import { 
-  ArrowLeft, 
-  User, 
-  FileText, 
-  Info, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Pill, 
-  Stethoscope, 
-  LayoutGrid, 
-  Receipt,
-  PauseCircle,
-  PackageCheck
-} from 'lucide-react';
+// import React, { useState, useEffect, useCallback } from 'react';
+// import { useLocation, useNavigate } from 'react-router-dom';
+// import { 
+//   Search, Trash2, CheckCircle2, AlertTriangle, PackageCheck, Receipt, X, Pill, ArrowRight, RefreshCw
+// } from 'lucide-react';
+// import { searchDrugByName, getDrugs as searchDrugs } from './apis';
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Badge } from "@/components/ui/badge";
+// import TopHeader from "@/components/Top-Header";
+// import DynamicNavbar from "@/components/DynamicNavbar";
 
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+// export default function PharmacyDispensing() {
+//   const location = useLocation();
+//   const navigate = useNavigate();
+//   const { medicines, patientName, prescriptionId } = location.state || { medicines: [] };
+
+//   const [matches, setMatches] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const performAutoMatch = useCallback(async () => {
+//     setLoading(true);
+//     const results = await Promise.all(medicines.map(async (pres) => {
+//       const inv = await searchDrugByName(pres.name);
+//       const reqQty = parseInt(pres.duration || 1) * 2; 
+//       return {
+//         ...pres,
+//         inventoryItem: inv,
+//         isAccepted: !!(inv && inv.quantity >= reqQty),
+//         status: inv ? (inv.quantity >= reqQty ? "Exact Match" : "Low Stock") : "No Match",
+//         manualSearch: false,
+//         isRejected: false // Track if the match was manually rejected
+//       };
+//     }));
+//     setMatches(results);
+//     setLoading(false);
+//   }, [medicines]);
+
+//   useEffect(() => { if (medicines.length > 0) performAutoMatch(); }, [performAutoMatch]);
+
+//   const handleManualSelect = (index, selectedItem) => {
+//     const updated = [...matches];
+//     updated[index] = {
+//       ...updated[index],
+//       inventoryItem: selectedItem,
+//       status: "Manually Substituted",
+//       isAccepted: true,
+//       manualSearch: false,
+//       isRejected: false 
+//     };
+//     setMatches(updated);
+//   };
+
+//   const handleReject = (index) => {
+//     const updated = [...matches];
+//     updated[index].isAccepted = false;
+//     updated[index].isRejected = true;
+//     updated[index].inventoryItem = null;
+//     updated[index].status = "Rejected";
+//     updated[index].manualSearch = true; // Automatically open search on reject
+//     setMatches(updated);
+//   };
+
+//   const handleCheckout = () => {
+//     const acceptedItems = matches.filter(m => m.isAccepted);
+//     navigate('/pharmacy-receipt', { 
+//       state: { acceptedItems, patientName, prescriptionId } 
+//     });
+//   };
+
+//   return (
+//     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-zinc-950">
+//       <TopHeader />
+//       <div className="flex flex-1">
+//         <DynamicNavbar />
+//         <main className="flex-1 p-8 max-w-5xl mx-auto w-full">
+//           <div className="flex justify-between items-center mb-10">
+//             <div>
+//               <h1 className="text-3xl font-black tracking-tight">Dispensing: {patientName}</h1>
+//               <p className="text-muted-foreground font-medium">Verify or substitute prescribed medications.</p>
+//             </div>
+//             <Badge className="px-4 py-1 text-sm font-black">RX-{prescriptionId}</Badge>
+//           </div>
+
+//           <div className="space-y-6">
+//             {matches.map((item, idx) => (
+//               <div key={idx} className="relative">
+//                 <MatchingRow 
+//                   item={item} 
+//                   onToggleAccept={() => {
+//                     const up = [...matches];
+//                     up[idx].isAccepted = !up[idx].isAccepted;
+//                     setMatches(up);
+//                   }}
+//                   onReject={() => handleReject(idx)}
+//                   onOpenSearch={() => {
+//                     const up = [...matches];
+//                     up[idx].manualSearch = true;
+//                     setMatches(up);
+//                   }}
+//                 />
+                
+//                 {item.manualSearch && (
+//                   <ManualSearchOverlay 
+//                     onClose={() => {
+//                       const up = [...matches];
+//                       up[idx].manualSearch = false;
+//                       setMatches(up);
+//                     }}
+//                     onSelect={(selected) => handleManualSelect(idx, selected)}
+//                   />
+//                 )}
+//               </div>
+//             ))}
+//           </div>
+
+//           {matches.some(m => m.isAccepted) && (
+//             <div className="mt-12 flex justify-end">
+//               <Button onClick={handleCheckout} size="lg" className="h-16 px-10 rounded-2xl font-black text-lg gap-3 shadow-2xl shadow-primary/40">
+//                 <Receipt size={24} /> Proceed to Receipt
+//               </Button>
+//             </div>
+//           )}
+//         </main>
+//       </div>
+//     </div>
+//   );
+// }
+
+// function MatchingRow({ item, onToggleAccept, onReject, onOpenSearch }) {
+//   const { inventoryItem, isAccepted, status, isRejected } = item;
+//   const isGoodMatch = status === "Exact Match" || status === "Manually Substituted";
+
+//   return (
+//     <Card className={`overflow-hidden border-2 transition-all ${isAccepted ? 'border-primary bg-primary/[0.02]' : isRejected ? 'border-destructive/30 bg-destructive/[0.01]' : 'border-slate-200'}`}>
+//       <div className="flex flex-col md:flex-row">
+//         {/* Prescribed Medicine Info */}
+//         <div className="flex-1 p-6 border-r border-slate-100 dark:border-zinc-800">
+//           <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+//             <Pill size={14} /> <span className="text-[10px] font-black uppercase tracking-widest">Prescribed</span>
+//           </div>
+//           <h3 className="text-xl font-black">{item.name}</h3>
+//           <p className="text-xs font-bold text-slate-500 mt-1 uppercase">Freq: {item.frequency} | Days: {item.duration}</p>
+//         </div>
+
+//         {/* Inventory Matching Actions */}
+//         <div className="flex-1 p-6 bg-white dark:bg-zinc-900">
+//           {inventoryItem ? (
+//             <div className="flex flex-col h-full justify-between">
+//               <div className="flex justify-between items-start">
+//                 <div>
+//                   <Badge variant={isGoodMatch ? "success" : "warning"} className="mb-2 font-black uppercase text-[10px]">
+//                     {status}
+//                   </Badge>
+//                   <p className="font-bold text-slate-900 dark:text-slate-100">{inventoryItem.name}</p>
+//                   <p className="text-xs text-muted-foreground font-medium">Available: {inventoryItem.quantity} units</p>
+//                 </div>
+//                 {/* Reject Option */}
+//                 {!isAccepted && (
+//                   <Button variant="ghost" size="sm" onClick={onReject} className="text-destructive font-bold text-xs gap-1 hover:bg-destructive/10">
+//                     <Trash2 size={14} /> Reject Match
+//                   </Button>
+//                 )}
+//               </div>
+              
+//               <div className="mt-4 flex gap-2">
+//                 <Button onClick={onToggleAccept} className="flex-1 font-black rounded-xl">
+//                   {isAccepted ? <CheckCircle2 className="mr-2 size-4" /> : null}
+//                   {isAccepted ? "Accepted" : "Accept Medicine"}
+//                 </Button>
+//                 {isAccepted && (
+//                   <Button variant="outline" size="icon" onClick={onReject} className="rounded-xl border-destructive/20 text-destructive hover:bg-destructive/5">
+//                     <RefreshCw size={16} />
+//                   </Button>
+//                 )}
+//               </div>
+//             </div>
+//           ) : (
+//             <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
+//               <span className="text-xs font-black text-destructive uppercase tracking-tighter flex items-center gap-1">
+//                 <AlertTriangle size={14} /> {isRejected ? "Match Rejected" : "No Match Found"}
+//               </span>
+//               <Button onClick={onOpenSearch} variant="secondary" size="sm" className="font-black gap-2 w-full rounded-xl">
+//                 <Search size={14} /> {isRejected ? "Search Substitute" : "Manual Selection"}
+//               </Button>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </Card>
+//   );
+// }
+
+// // ManualSearchOverlay remains largely the same, ensuring results.data is mapped
+// function ManualSearchOverlay({ onClose, onSelect }) {
+//   const [query, setQuery] = useState('');
+//   const [results, setResults] = useState([]);
+
+//   useEffect(() => {
+//     const delayDebounceFn = setTimeout(async () => {
+//       if (query.length > 2) {
+//         const data = await searchDrugs(query);
+//         setResults(data.data || []);
+//       }
+//     }, 300);
+//     return () => clearTimeout(delayDebounceFn);
+//   }, [query]);
+
+//   return (
+//     <div className="h-100 absolute inset-0 z-20 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md p-6 rounded-2xl flex flex-col gap-4 border-2 border-primary shadow-2xl animate-in zoom-in-95">
+//       <div className="flex justify-between items-center">
+//         <h4 className="font-black text-primary uppercase text-xs tracking-widest">Substitution Search</h4>
+//         <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full"><X size={18} /></Button>
+//       </div>
+//       <div className="relative">
+//         <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+//         <Input 
+//           autoFocus
+//           placeholder="Search inventory for substitute..." 
+//           className="pl-12 h-14 rounded-2xl font-bold text-base border-primary/20"
+//           value={query}
+//           onChange={(e) => setQuery(e.target.value)}
+//         />
+//       </div>
+//       <div className="flex flex-col gap-2 overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
+//         {results.map((res) => (
+//           <button 
+//             key={res.id} 
+//             onClick={() => onSelect(res)}
+//             className="flex justify-between items-center p-4 rounded-2xl hover:bg-primary/10 border border-slate-100 dark:border-zinc-800 transition-all text-left group"
+//           >
+//             <div>
+//               <p className="font-black text-sm group-hover:text-primary transition-colors">{res.name}</p>
+//               <div className="flex gap-2 mt-1">
+//                 <Badge variant="outline" className="text-[9px] font-bold py-0">{res.drug_form}</Badge>
+//                 <span className="text-[10px] text-muted-foreground font-bold">Qty: {res.quantity}</span>
+//               </div>
+//             </div>
+//             <ArrowRight size={18} className="text-slate-300 group-hover:text-primary transform group-hover:translate-x-1 transition-all" />
+//           </button>
+//         ))}
+//         {query.length > 2 && results.length === 0 && (
+//           <p className="text-center py-10 text-xs font-bold text-muted-foreground">No substitute found in inventory.</p>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { 
+  Search, Trash2, CheckCircle2, AlertTriangle, Receipt, X, Pill, ArrowRight, RefreshCw, Save
+} from 'lucide-react';
+import { searchDrugByName, getDrugs as searchDrugs } from './apis';
+import { editPrescription } from '@/pages/Doctor/apis'
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Separator } from "@/components/ui/separator";
-import DynamicNavbar from "@/components/DynamicNavbar";
 import TopHeader from "@/components/Top-Header";
+import DynamicNavbar from "@/components/DynamicNavbar";
 
 export default function PharmacyDispensing() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  // 1. Extract data from navigation state
+  const { medicines, patientName, prescriptionId } = location.state || { medicines: [] };
+
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Core Function: Auto-Match and State Restoration
+  const performAutoMatch = useCallback(async () => {
+    setLoading(true);
+    const results = await Promise.all(medicines.map(async (pres) => {
+      // If status is already "Issued" or "Changed", we use the existing issuedMedicine data
+      if (pres.status === "Issued" || pres.status === "Changed") {
+        return {
+          ...pres,
+          inventoryItem: pres.issuedMedicine, // Use the stored record
+          isAccepted: true,
+          status: pres.status,
+          manualSearch: false,
+          isRejected: false
+        };
+      }
+
+      // If status is "Rejected", keep it as is
+      if (pres.status === "Rejected") {
+        return { ...pres, inventoryItem: null, isAccepted: false, status: "Rejected", manualSearch: false, isRejected: true };
+      }
+
+      // Default: Search inventory for a match (Prescripted state)
+      const inv = await searchDrugByName(pres.name);
+      const reqQty = parseInt(pres.duration || 1) * 2; 
+      
+      return {
+        ...pres,
+        inventoryItem: inv,
+        isAccepted: !!(inv && inv.quantity >= reqQty),
+        status: inv ? (inv.quantity >= reqQty ? "Exact Match" : "Low Stock") : "No Match",
+        manualSearch: false,
+        isRejected: false
+      };
+    }));
+    setMatches(results);
+    setLoading(false);
+  }, [medicines]);
+
+  useEffect(() => { if (medicines.length > 0) performAutoMatch(); }, [performAutoMatch]);
+
+  // Handle Acceptance (Sets status to "Issued")
+  const handleAccept = (index) => {
+    const updated = [...matches];
+    const item = updated[index];
+    
+    item.isAccepted = true;
+    item.isRejected = false;
+    // Determine if this is the original medicine or a substitution
+    item.status = (item.name.toLowerCase() === item.inventoryItem?.name?.toLowerCase()) ? "Issued" : "Changed";
+    
+    // Attach issuedMedicine data
+    item.issuedMedicine = {
+      ...item.inventoryItem,
+      issued_quantity: parseInt(item.duration || 1) * 2
+    };
+    
+    setMatches(updated);
+  };
+
+  // Handle Rejection (Sets status to "Rejected")
+  const handleReject = (index) => {
+    const updated = [...matches];
+    updated[index].isAccepted = false;
+    updated[index].isRejected = true;
+    updated[index].inventoryItem = null;
+    updated[index].status = "Rejected";
+    updated[index].issuedMedicine = null;
+    updated[index].manualSearch = true; 
+    setMatches(updated);
+  };
+
+  const handleManualSelect = (index, selectedItem) => {
+    const updated = [...matches];
+    updated[index] = {
+      ...updated[index],
+      inventoryItem: selectedItem,
+      status: "Changed", // If manual select, it's a change
+      isAccepted: true,
+      manualSearch: false,
+      isRejected: false,
+      issuedMedicine: {
+        ...selectedItem,
+        issued_quantity: parseInt(updated[index].duration || 1) * 2
+      }
+    };
+    setMatches(updated);
+  };
+
+  // Sync with Backend
+  const saveDispensingState = async () => {
+    try {
+      // Prepare the payload matching the required record structure
+      const updatedPrescription = matches.map(m => ({
+        id: m.id || Date.now(),
+        name: m.name,
+        dosage: m.dosage,
+        frequency: m.frequency,
+        duration: m.duration,
+        notes: m.notes,
+        status: m.status, // Issued, Rejected, or Changed
+        issuedMedicine: m.issuedMedicine || null
+      }));
+
+      await editPrescription(prescriptionId, { prescription: JSON.stringify(updatedPrescription) });
+      return true;
+    } catch (err) {
+      console.error("Failed to sync prescription:", err);
+      alert("Sync failed. Check connection.");
+      return false;
+    }
+  };
+
+  const handleCheckout = async () => {
+    const success = await saveDispensingState();
+    if (success) {
+      const acceptedItems = matches.filter(m => m.isAccepted);
+      navigate('/pharmacy-receipt', { 
+        state: { acceptedItems, patientName, prescriptionId } 
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-zinc-950">
       <TopHeader />
-
       <div className="flex flex-1">
         <DynamicNavbar />
-        <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Column: Prescription Overview */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
-            <Card className="border-slate-200 dark:border-zinc-800 shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-black flex items-center gap-2">
-                  <FileText className="size-5 text-primary" />
-                  Prescription Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <InfoUnit label="Doctor" value="Dr. Sarah Smith" />
-                  <InfoUnit label="Date" value="Oct 24, 2023" />
-                </div>
-                <InfoUnit label="Diagnosis" value="Acute Fever & Viral Symptoms" />
-                <div className="p-4 bg-slate-100 dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Doctor's Notes</p>
-                  <p className="text-sm italic text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                    "Take after meals. Drink plenty of water. Monitor temperature every 6 hours."
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+        <main className="flex-1 p-8 max-w-5xl mx-auto w-full">
+          <header className="flex justify-between items-center mb-10">
+            <div>
+              <h1 className="text-3xl font-black tracking-tight">Dispensing: {patientName}</h1>
+              <p className="text-muted-foreground font-medium italic">Pharmacy Records Sync Active</p>
+            </div>
+            <Button onClick={saveDispensingState} variant="outline" className="font-bold gap-2">
+              <Save size={16} /> Save Progress
+            </Button>
+          </header>
 
-            <Card className="bg-primary/[0.03] dark:bg-primary/[0.07] border-primary/20 border-dashed">
-              <CardContent className="p-6">
-                <h3 className="font-black text-primary mb-2 flex items-center gap-2 uppercase text-xs tracking-widest">
-                  <Info className="size-4" />
-                  System Alert
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-                  Inventory levels for <strong>Paracetamol 500mg</strong> are fluctuating. Please verify physical stock before final confirmation.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="space-y-6">
+            {matches.map((item, idx) => (
+              <div key={idx} className="relative">
+                <MatchingRow 
+                  item={item} 
+                  onAccept={() => handleAccept(idx)}
+                  onReject={() => handleReject(idx)}
+                  onOpenSearch={() => {
+                    const up = [...matches];
+                    up[idx].manualSearch = true;
+                    setMatches(up);
+                  }}
+                />
+                
+                {item.manualSearch && (
+                  <ManualSearchOverlay 
+                    onClose={() => {
+                      const up = [...matches];
+                      up[idx].manualSearch = false;
+                      setMatches(up);
+                    }}
+                    onSelect={(selected) => handleManualSelect(idx, selected)}
+                  />
+                )}
+              </div>
+            ))}
           </div>
 
-          {/* Right Column: Medicine Matching & Billing */}
-          <div className="lg:col-span-2 flex flex-col gap-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
-                <LayoutGrid className="size-6 text-primary" />
-                Medicine Matching Panel
-              </h2>
-            </div>
-
-            {/* Matching Cards */}
-            <div className="space-y-6">
-              {/* Case 1: Match Found */}
-              <MatchingCard 
-                name="Paracetamol 500mg"
-                dosage="1-0-1 (Twice daily)"
-                duration="5 Days"
-                total="10 Units"
-                stock={450}
-                status="Match Found"
-                variant="success"
-              />
-
-              {/* Case 2: Insufficient Stock */}
-              <MatchingCard 
-                name="Amoxicillin 250mg"
-                dosage="1-1-1 (Thrice daily)"
-                duration="7 Days"
-                total="21 Units"
-                stock={8}
-                status="Insufficient Stock"
-                variant="warning"
-              />
-            </div>
-
-            {/* Billing Summary Section */}
-            <Card className="border-slate-200 dark:border-zinc-800 shadow-xl overflow-hidden mt-4">
-              <CardHeader className="bg-white dark:bg-zinc-900 border-b">
-                <CardTitle className="text-lg font-black tracking-tight">Billing Summary</CardTitle>
-              </CardHeader>
-              <Table>
-                <TableHeader className="bg-slate-50 dark:bg-zinc-900/50">
-                  <TableRow>
-                    <TableHead className="font-black text-[10px] uppercase tracking-widest px-6">Medicine</TableHead>
-                    <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Qty</TableHead>
-                    <TableHead className="text-right font-black text-[10px] uppercase tracking-widest">Price/Unit</TableHead>
-                    <TableHead className="text-right font-black text-[10px] uppercase tracking-widest px-6">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow className="hover:bg-transparent">
-                    <TableCell className="px-6 py-4 font-bold">Paracetamol 500mg</TableCell>
-                    <TableCell className="text-center font-medium">10</TableCell>
-                    <TableCell className="text-right text-muted-foreground font-medium">$0.50</TableCell>
-                    <TableCell className="text-right px-6 font-bold">$5.00</TableCell>
-                  </TableRow>
-                  <TableRow className="hover:bg-transparent">
-                    <TableCell className="px-6 py-4 font-bold">Amoxicillin 250mg <Badge variant="outline" className="ml-2 text-[8px] h-4 uppercase">Partial</Badge></TableCell>
-                    <TableCell className="text-center font-medium">8</TableCell>
-                    <TableCell className="text-right text-muted-foreground font-medium">$1.25</TableCell>
-                    <TableCell className="text-right px-6 font-bold">$10.00</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              
-              <div className="p-8 bg-slate-50 dark:bg-zinc-900/50 border-t">
-                <div className="flex flex-col gap-3 max-w-xs ml-auto">
-                  <SummaryRow label="Subtotal" value="$15.00" />
-                  <SummaryRow label="Tax (5%)" value="$0.75" />
-                  <Separator className="my-2" />
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-xl font-black tracking-tight">Grand Total</span>
-                    <span className="text-2xl font-black tracking-tighter text-primary">$15.75</span>
-                  </div>
-                  <Button className="w-full h-12 font-black shadow-lg shadow-primary/30 rounded-xl gap-2 text-base">
-                    <Receipt className="size-5" /> Generate Receipt
-                  </Button>
-                </div>
-              </div>
-            </Card>
+          <div className="mt-12 flex justify-end">
+             <Button onClick={handleCheckout} size="lg" className="h-16 px-10 rounded-2xl font-black text-lg gap-3 shadow-2xl shadow-primary/40">
+                <Receipt size={24} /> Confirm & Receipt
+             </Button>
           </div>
         </main>
-
-        <footer className="mt-16 py-8 border-t text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground opacity-50">
-            © 2026 HMS - Laboratory Information System v4.2
-          </p>
-        </footer>
       </div>
     </div>
   );
 }
 
-// Internal Helper Components
-function InfoUnit({ label, value }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{label}</p>
-      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{value}</p>
-    </div>
-  );
-}
+function MatchingRow({ item, onAccept, onReject, onOpenSearch }) {
+  const { inventoryItem, isAccepted, status } = item;
+  
+  // Dynamic status styling
+  const getBadgeColor = () => {
+    if (status === "Issued" || status === "Exact Match") return "success";
+    if (status === "Changed") return "default"; // Usually blue/primary
+    if (status === "Rejected") return "destructive";
+    return "warning";
+  };
 
-function SummaryRow({ label, value }) {
   return (
-    <div className="flex justify-between items-center text-sm font-medium">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-slate-900 dark:text-slate-100 font-bold">{value}</span>
-    </div>
-  );
-}
-
-function MatchingCard({ name, dosage, duration, total, stock, status, variant }) {
-  const isSuccess = variant === 'success';
-  return (
-    <Card className="overflow-hidden border-slate-200 dark:border-zinc-800 shadow-sm flex flex-col md:flex-row h-full">
-      <div className="flex-1 p-6 border-b md:border-b-0 md:border-r bg-white dark:bg-zinc-900">
-        <div className="flex justify-between items-start mb-6">
-          <Badge variant="outline" className="text-[10px] font-black uppercase border-slate-200">Prescribed</Badge>
-          <Pill className="size-5 text-slate-300" />
-        </div>
-        <h3 className="text-xl font-black tracking-tight mb-4">{name}</h3>
-        <div className="space-y-3">
-          <div className="flex justify-between text-xs font-bold">
-            <span className="text-muted-foreground uppercase tracking-tighter">Dosage</span>
-            <span>{dosage}</span>
+    <Card className={`overflow-hidden border-2 transition-all ${isAccepted ? 'border-primary' : status === "Rejected" ? 'border-destructive' : 'border-slate-200'}`}>
+      <div className="flex flex-col md:flex-row">
+        <div className="flex-1 p-6 border-r border-slate-100 dark:border-zinc-800">
+          <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+            <Pill size={14} /> <span className="text-[10px] font-black uppercase tracking-widest">Prescription Item</span>
           </div>
-          <div className="flex justify-between text-xs font-bold">
-            <span className="text-muted-foreground uppercase tracking-tighter">Duration</span>
-            <span>{duration}</span>
-          </div>
-          <Separator className="opacity-50" />
-          <div className="flex justify-between items-center pt-1">
-            <span className="text-sm font-black uppercase">Total Required</span>
-            <span className="text-lg font-black text-primary tracking-tighter">{total}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div className={`flex-1 p-6 ${isSuccess ? 'bg-emerald-50/50 dark:bg-emerald-950/20' : 'bg-amber-50/50 dark:bg-amber-950/20'}`}>
-        <div className="flex justify-between items-start mb-6">
-          <Badge className={`font-black uppercase text-[10px] tracking-tight border-none ${
-            isSuccess ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-          }`}>
-            {status}
-          </Badge>
-          {isSuccess ? <CheckCircle2 className="size-5 text-emerald-500" /> : <AlertTriangle className="size-5 text-amber-500" />}
-        </div>
-        
-        <div className="flex items-baseline gap-2 mb-8">
-          <span className={`text-4xl font-black tracking-tighter ${stock < 10 ? 'text-destructive' : ''}`}>{stock}</span>
-          <span className="text-xs font-bold text-muted-foreground uppercase">In Stock</span>
+          <h3 className="text-xl font-black">{item.name}</h3>
+          <p className="text-xs font-bold text-slate-500 uppercase">Status: {status}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button size="sm" className={`font-bold h-10 ${isSuccess ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-primary'}`}>
-            {isSuccess ? 'Accept' : 'Partial Accept'}
-          </Button>
-          <Button size="sm" variant="outline" className="font-bold h-10 border-slate-300 bg-white dark:bg-zinc-800">
-            Decline
-          </Button>
+        <div className="flex-1 p-6 bg-white dark:bg-zinc-900">
+          {inventoryItem ? (
+            <div className="flex flex-col h-full justify-between">
+              <div className="flex justify-between items-start">
+                <div>
+                  <Badge variant={getBadgeColor()} className="mb-2 font-black uppercase text-[10px]">{status}</Badge>
+                  <p className="font-bold">{inventoryItem.name}</p>
+                  <p className="text-xs text-muted-foreground">Manufacturer: {inventoryItem.manufacturer_name}</p>
+                </div>
+                {!isAccepted && <Button variant="ghost" size="sm" onClick={onReject} className="text-destructive"><Trash2 size={16} /></Button>}
+              </div>
+              <div className="mt-4 flex gap-2">
+                <Button onClick={onAccept} className="flex-1 font-black" variant={isAccepted ? "secondary" : "default"}>
+                  {isAccepted ? "Re-Issue" : "Issue Medicine"}
+                </Button>
+                <Button variant="outline" size="icon" onClick={onReject} className="text-destructive"><RefreshCw size={16} /></Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full gap-2">
+              <span className="text-[10px] font-black text-destructive uppercase">Pending Action</span>
+              <Button onClick={onOpenSearch} variant="secondary" size="sm" className="w-full font-bold">Substitute / Search</Button>
+            </div>
+          )}
         </div>
       </div>
     </Card>
+  );
+}
+
+function ManualSearchOverlay({ onClose, onSelect }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (query.length > 2) {
+        const data = await searchDrugs(query);
+        setResults(data.data || []);
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounceFn);
+  }, [query]);
+
+  return (
+    <div className="h-100 absolute inset-0 z-20 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md p-6 rounded-2xl flex flex-col gap-4 border-2 border-primary shadow-2xl animate-in zoom-in-95">
+      <div className="flex justify-between items-center">
+        <h4 className="font-black text-primary uppercase text-xs tracking-widest">Substitution Search</h4>
+        <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full"><X size={18} /></Button>
+      </div>
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+        <Input 
+          autoFocus
+          placeholder="Search inventory for substitute..." 
+          className="pl-12 h-14 rounded-2xl font-bold text-base border-primary/20"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+      <div className="flex flex-col gap-2 overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
+        {results.map((res) => (
+          <button 
+            key={res.id} 
+            onClick={() => onSelect(res)}
+            className="flex justify-between items-center p-4 rounded-2xl hover:bg-primary/10 border border-slate-100 dark:border-zinc-800 transition-all text-left group"
+          >
+            <div>
+              <p className="font-black text-sm group-hover:text-primary transition-colors">{res.name}</p>
+              <div className="flex gap-2 mt-1">
+                <Badge variant="outline" className="text-[9px] font-bold py-0">{res.drug_form}</Badge>
+                <span className="text-[10px] text-muted-foreground font-bold">Qty: {res.quantity}</span>
+              </div>
+            </div>
+            <ArrowRight size={18} className="text-slate-300 group-hover:text-primary transform group-hover:translate-x-1 transition-all" />
+          </button>
+        ))}
+        {query.length > 2 && results.length === 0 && (
+          <p className="text-center py-10 text-xs font-bold text-muted-foreground">No substitute found in inventory.</p>
+        )}
+      </div>
+    </div>
   );
 }

@@ -21,7 +21,8 @@ import {
   createPrescription,
   getPatientPrescriptions,
   getTests,
-  deleteTest
+  deleteTest,
+  editPrescription
 } from "./apis";
 import TopHeader from '@/components/Top-Header';
 import DynamicNavbar from '@/components/DynamicNavbar';
@@ -38,6 +39,7 @@ const PatientDetailView = () => {
   const [testSearch, setTestSearch] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
+  const [prescriptionId, setPrescriptionId] = useState(null); // Track the ID
 
 
   // DetailedAppointment.jsx
@@ -49,9 +51,11 @@ const PatientDetailView = () => {
       const presRes = await getPatientPrescriptions(patient.id);
       if (Array.isArray(presRes) && presRes.length > 0) {
         const rawPrescription = presRes[0].prescription;
+        setPrescriptionId(presRes[0].id);
         setMedicines(JSON.parse(rawPrescription));
       } else {
-        setMedicines([{ id: Date.now(), name: "", dosage: "", frequency: "1-0-1", duration: "", notes: "" }]);
+        setPrescriptionId(null);
+        setMedicines([{ id: Date.now(), name: "", dosage: "", frequency: "1-0-1", duration: "", notes: "", status: "Prescripted" }]);
       }
 
       // 2. Fetch Existing Tests for THIS patient
@@ -126,6 +130,14 @@ const PatientDetailView = () => {
         prescription: JSON.stringify(medicines)
       };
       await createPrescription(prescriptionPayload);
+
+      if (prescriptionId) {
+        // Use the edit API and pass the specific ID
+        await editPrescription(prescriptionId, { prescription: JSON.stringify(medicines) });
+      } else {
+        // Fallback to create if it's a new entry
+        await createPrescription(prescriptionPayload);
+      }
 
       // Only create tests that are NOT already in the database
       const newTests = selectedTests.filter(t => !t.isExisting);

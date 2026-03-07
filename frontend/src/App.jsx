@@ -23,6 +23,7 @@ import EditMedicinePage from "@/pages/Pharmacy/AddMedicine"
 import PrescriptionQueue from "@/pages/Pharmacy/ViewPrescriptions"
 import PharmacyInventory from "@/pages/Pharmacy/ViewMedicine"
 import PharmacyDispensing from "@/pages/Pharmacy/MatchMedicines"
+import PharmacyReceipt from "@/pages/Pharmacy/ReciptTemplate"
 
 function App() {
   return (
@@ -197,10 +198,19 @@ function App() {
           />
           
           <Route 
-            path="/match-medicine"
+            path="/match-medicines"
             element={
               <ProtectedRoute allowedRoles={['Pharmacist']}>
                 <PharmacyDispensing />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/pharmacy-receipt"
+            element={
+              <ProtectedRoute allowedRoles={['Pharmacist']}>
+                <PharmacyReceipt />
               </ProtectedRoute>
             } 
           />
@@ -228,7 +238,7 @@ function App() {
                   return <Navigate to="/tests-dashboard" replace />;
                 }else if (userRole === "Pharmacist") {
                   console.log("returning to Pharmacist dashboard");
-                  return <Navigate to="/search-medicine" replace />;
+                  return <Navigate to="/prescription-medicine" replace />;
                 }
                 
                 // Fallback for other roles or unauthenticated users
