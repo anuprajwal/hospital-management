@@ -1,39 +1,52 @@
 import React from 'react';
-import { 
-    LayoutGrid, 
-  Users, 
-  Settings2, 
-  FileText, 
-  Hospital
-} from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Users, Settings2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-
-const Sidebar = () => {
+const SuperAdminSidebar = () => {
   return (
-    
-    <aside className="w-72 bg-white dark:bg-slate-950 border-r border-border flex flex-col fixed h-full z-20">
-        <div className="p-6 flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-lg text-primary"><Hospital size={28} /></div>
-          <div>
-            <h1 className="text-lg font-bold leading-tight">HMS Admin</h1>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Super Admin Panel</p>
-          </div>
+    <aside className="w-64 flex-shrink-0 h-full flex flex-col bg-card border-r border-border">
+      <div className="p-5 flex items-center gap-3 border-b border-border">
+        <div className="flex items-center justify-center w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+          <img src="/Logo.jpeg" alt="HMS" className="w-14 h-14 object-cover" />
         </div>
-        <nav className="flex-1 px-4 mt-4 space-y-1">
-            {/* <SidebarItem icon={<LayoutGrid size={20}/>} label="Hospital Builder" /> */}
-            <SidebarItem icon={<Users size={20}/>} href="/users" label="Users & Access" />
-            <SidebarItem icon={<Settings2 size={20}/>} href="/module-management" label="System Modules" active />
-            {/* <SidebarItem icon={<FileText size={20}/>} label="Audit Logs" /> */}
-        </nav>
-      </aside>
+        <div>
+          <h1 className="text-base font-semibold text-foreground">HMS</h1>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Super Admin</p>
+        </div>
+      </div>
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <NavLink
+          to="/users"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            )
+          }
+        >
+          <Users size={18} />
+          Users & Access
+        </NavLink>
+        <NavLink
+          to="/module-management"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            )
+          }
+        >
+          <Settings2 size={18} />
+          System Modules
+        </NavLink>
+      </nav>
+    </aside>
   );
 };
 
-const SidebarItem = ({ icon, href, label, active = false }) => (
-    <a href={href} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-slate-100"}`}>
-      {icon}
-      <span className="font-medium text-sm">{label}</span>
-    </a>
-);
-
-export default Sidebar;
+export default SuperAdminSidebar;

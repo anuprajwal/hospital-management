@@ -13,6 +13,53 @@ ACCEPTABLE_MODULES = ['Laboratory','Reception','Doctor', 'Out-Patient', 'Pharmac
 
 DB_NAME = "project_data.db"
 
+USERS_TABLE_SCHEMA = """
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_name TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('Super_Admin', 'Receptionist', 'Lab_Incharge', 'Admin', 'Doctor')),
+    status TEXT NOT NULL CHECK(status IN ('Approve', 'Frozen')),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+"""
+
+
+def _migrate_users_role_constraint_if_needed(connection, cursor):
+    """
+    If the users table was created with an old CHECK that only allowed
+    Super_Admin, Receptionist, Lab_Incharge, recreate the table with the full role list.
+    """
+    try:
+        cursor.execute("SAVEPOINT migration_check")
+        cursor.execute(
+            "INSERT INTO users (user_name, password, role, status) VALUES (?, ?, ?, ?)",
+            ("__migration_check__", "x", "Admin", "Approve"),
+        )
+        cursor.execute("ROLLBACK TO migration_check")
+        cursor.execute("RELEASE migration_check")
+        return
+    except sqlite3.IntegrityError as e:
+        try:
+            cursor.execute("ROLLBACK TO migration_check")
+        except sqlite3.OperationalError:
+            pass
+        if "CHECK" not in str(e):
+            raise
+    cursor.execute("PRAGMA foreign_keys = OFF")
+    cursor.execute("CREATE TABLE users_new (" + USERS_TABLE_SCHEMA + ")")
+    # Copy one row per user_name (keep lowest id) in case of duplicates
+    cursor.execute("""
+        INSERT INTO users_new (id, user_name, password, role, status, created_at)
+        SELECT id, user_name, password, role, status, created_at FROM users
+        WHERE id IN (SELECT MIN(id) FROM users GROUP BY user_name)
+        ORDER BY id
+    """)
+    cursor.execute("DROP TABLE users")
+    cursor.execute("ALTER TABLE users_new RENAME TO users")
+    cursor.execute("PRAGMA foreign_keys = ON")
+    connection.commit()
+    print("[*] Migrated users table to support Admin and Doctor roles.")
+
+
 def initialize_database():
     """
     Creates the .db file if it doesn't exist and 
@@ -37,6 +84,9 @@ def initialize_database():
     INSERT OR IGNORE INTO users (user_name, password, role, status)
     VALUES (?, ?, ?, ?)
 """, ('admin', super_admin_password, 'Super_Admin', 'Approve'))
+
+    # Migrate users table if it was created with old CHECK (only 3 roles)
+    _migrate_users_role_constraint_if_needed(connection, cursor)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS forms (

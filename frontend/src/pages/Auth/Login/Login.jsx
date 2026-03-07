@@ -39,11 +39,25 @@ export default function LoginPage() {
         const result = await loginUser(formData);
 
         if (result.ok && result.data.jwt) {
-            console.log(result.data)
-            localStorage.setItem('user_auth', result.data.jwt);
-            localStorage.setItem('user_role', result.data.user_role);
+            const token = result.data.jwt;
+            // Support both "user_role" and "role" from API
+            const role = result.data.user_role ?? result.data.role ?? formData.role;
 
-            const from = location.state?.from?.pathname || "/dashboard";
+            localStorage.setItem('user_auth', token);
+            localStorage.setItem('user_role', role);
+            if (formData.username) {
+                localStorage.setItem('user_name', formData.username.trim());
+            }
+
+            // Default destination by role so we don't hit a route that redirects back to login
+            const defaultByRole = {
+                Super_Admin: '/module-management',
+                Admin: '/dashboard',
+                Receptionist: '/appointment-dashboard',
+                Doctor: '/doctor-appointments',
+                Lab_Incharge: '/dashboard',
+            };
+            const from = location.state?.from?.pathname ?? defaultByRole[role] ?? '/dashboard';
 
             setTimeout(() => {
                 navigate(from, { replace: true });

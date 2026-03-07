@@ -20,6 +20,12 @@ const navItems = [
 const ReceptionistSidebar = () => {
   return (
     <aside className="w-60 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background flex flex-col h-full">
+      <div className="p-4 flex items-center gap-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-center w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+          <img src="/Logo.jpeg" alt="HMS" className="w-14 h-14 object-cover" />
+        </div>
+        <h2 className="text-lg font-bold tracking-tight">HMS</h2>
+      </div>
       <ScrollArea className="flex-1 py-6">
         <nav className="space-y-1 px-3">
           {navItems.map((item) => (

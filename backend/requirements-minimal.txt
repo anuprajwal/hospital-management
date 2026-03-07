@@ -1,0 +1,6 @@
+# Minimal deps to run the backend (uses SQLite; no mysqlclient).
+# Use this if "pip install -r requirements.txt" fails due to mysqlclient.
+Flask==3.1.1
+Flask-Cors==5.0.0
+python-dotenv==1.0.1
+PyJWT==2.11.0
